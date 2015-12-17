@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Breeze.ContextProvider;
+using Breeze.ContextProvider.EF6;
+using System;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Data.Objects;
+using System.Data.Entity.Core.Objects;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Breeze.WebApi;
-using System.Diagnostics;
 
 namespace MetadataGenerator
 {
@@ -149,19 +144,21 @@ namespace MetadataGenerator
         {
             try
             {
-                var context = Activator.CreateInstance(type);
+                var providerType = typeof(EFContextProvider<>).MakeGenericType(type);
+                var provider = (ContextProvider)Activator.CreateInstance(providerType);
+                var metadata = provider.Metadata();
 
-                return EFContextProvider<object>.GetMetadataFromContext(context);
+                return metadata;
             }
-            catch (InvalidOperationException) // This is might be because we have a DbFirst DbContext, so let's try it out.
-            {
-                try {
-                    return EFContextProvider<object>.GetMetadataFromDbFirstAssembly(type.Assembly, Options.ResourcePrefix);
-                }
-                catch (Exception ex) {
-                    Console.WriteLine("An exception was thrown while processing the dbfirst assembly {0}. {1}", type.Assembly.FullName, ex);
-                }
-            }
+            //catch (InvalidOperationException iex) // This is might be because we have a DbFirst DbContext, so let's try it out.
+            //{
+            //    try {
+            //        return EFContextProvider<object>.GetMetadataFromDbFirstAssembly(type.Assembly, Options.ResourcePrefix);
+            //    }
+            //    catch (Exception ex) {
+            //        Console.WriteLine("An exception was thrown while processing the dbfirst assembly {0}. {1}", type.Assembly.FullName, ex);
+            //    }
+            //}
             catch (Exception ex)
             {
                 Console.WriteLine("An exception was thrown while processing {0}. {1}", type.FullName, ex);

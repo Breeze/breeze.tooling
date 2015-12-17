@@ -1,6 +1,6 @@
 // Import metadata
 var fs = require('fs');
-var breeze = require("breezejs");
+var breeze = require("breeze-client");
 var filenameIn = process.argv[2];  // '..\\Fng.Space.Data.EF.SpaceDbContext.csdl.json';
 
 var metadata = fs.readFileSync(filenameIn, 'utf8');

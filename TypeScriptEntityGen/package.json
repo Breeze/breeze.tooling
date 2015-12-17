@@ -1,0 +1,16 @@
+{
+  "name": "typescriptentitygen",
+  "version": "1.0.0",
+  "description": "Generates TypeScript classes for Breeze entities",
+  "main": "tsgen.js",
+  "dependencies": {
+    "breeze-client": "^1.5.5",
+    "handlebars": "^1.0.12"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marcel Good",
+  "license": "ISC"
+}

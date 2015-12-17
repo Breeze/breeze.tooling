@@ -1,0 +1,12 @@
+{{#modules}}/// <reference path="{{path}}.ts" />
+{{/modules}}
+module {{namespace}} {
+
+    export class _RegistrationHelper {
+
+        static register(metadataStore) {
+            {{#modules}}metadataStore.registerEntityTypeCtor('{{entityType.shortName}}', {{entityType.namespace}}.{{entityType.shortName}}{{#entityType.initializerFn}}, {{../entityType.namespace}}.{{../entityType.shortName}}.{{.}}{{/entityType.initializerFn}});
+            {{/modules}}
+        }
+    }
+}

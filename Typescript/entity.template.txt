@@ -1,0 +1,18 @@
+{{#references}}/// <reference path="{{path}}.ts" />
+{{/references}}
+/// <code-reference> Place custom references between <code-reference> tags
+{{{codereference}}}
+/// </code-reference>
+
+module {{namespace}} {
+
+   export class {{shortName}} {{#baseClass}}extends {{.}} {{/baseClass}}{
+       /// <code> Place custom code between <code> tags
+       {{{code}}}
+       /// </code>
+
+       // Generated code. Do not place code below this line.
+       {{#properties}}{{name}}: {{dataType}};
+       {{/properties}}
+   }
+}

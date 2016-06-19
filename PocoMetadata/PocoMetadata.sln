@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoMetadataCLI", "PocoMetadataCLI\PocoMetadataCLI.csproj", "{F08D6409-D6AA-428C-91F3-58C858FD919F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoMetadataGenerator", "PocoMetadataGenerator\PocoMetadataGenerator.csproj", "{CCA0EECD-649D-4F2D-BFE0-E9C227848ACE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F08D6409-D6AA-428C-91F3-58C858FD919F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F08D6409-D6AA-428C-91F3-58C858FD919F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F08D6409-D6AA-428C-91F3-58C858FD919F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F08D6409-D6AA-428C-91F3-58C858FD919F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA0EECD-649D-4F2D-BFE0-E9C227848ACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA0EECD-649D-4F2D-BFE0-E9C227848ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA0EECD-649D-4F2D-BFE0-E9C227848ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA0EECD-649D-4F2D-BFE0-E9C227848ACE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Breeze.PocoMetadata
 {
@@ -57,6 +53,10 @@ namespace Breeze.PocoMetadata
             if (type.Name == "PreviousEmployee")
             {
                 if (name == "EmployeeID") return true;
+            }
+            if (type.Name == "ProductDiscontinued")
+            {
+                if (name == "ProductID") return true;
             }
             if (type.Name == "Comment")
             {

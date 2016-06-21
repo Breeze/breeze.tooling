@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Breeze.PocoMetadata
 {
@@ -31,7 +27,15 @@ namespace Breeze.PocoMetadata
                 return;
             }
             string outfile = GetFilePath();
-            var metadata = Generator.Generate(assemblyName);
+
+            // TODO: how to get this from the command line?
+            EntityDescriptor descriptor;
+            if (assemblyName.Contains("Northwind"))
+                descriptor = new NorthwindEntityDescriptor();
+            else
+                descriptor = new EntityDescriptor();
+
+            var metadata = Generator.Generate(assemblyName, descriptor);
             var json = ToJson(metadata);
 
             if (outfile != null)

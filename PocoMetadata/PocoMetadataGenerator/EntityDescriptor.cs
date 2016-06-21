@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Breeze.PocoMetadata
 {
@@ -15,7 +11,7 @@ namespace Breeze.PocoMetadata
     /// 
     /// Extend this class to adapt to your data model.
     /// </summary>
-    public abstract class EntityDescriptor
+    public class EntityDescriptor
     {
         /// <summary>
         /// Filter types from metadata generation.
@@ -100,6 +96,18 @@ namespace Breeze.PocoMetadata
         {
             if (propertyInfo.Name == "RowVersion") return true;
             return false;
+        }
+
+        /// <summary>
+        /// Change the type of the given data property in the metadata.
+        /// For example, a custom wrapper type on the server may be unwrapped on the client, and the metadata reflects this.
+        /// </summary>
+        /// <param name="type">Entity type for which metadata is being generated</param>
+        /// <param name="propertyInfo">Property being considered</param>
+        /// <returns>Type of the property to put in the metadata, or null to exclude the property.</returns>
+        public virtual Type GetDataPropertyType(Type type, PropertyInfo propertyInfo)
+        {
+            return propertyInfo.PropertyType;
         }
 
         /// <summary>

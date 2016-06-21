@@ -25,7 +25,7 @@ namespace Breeze.PocoMetadata
 
         public static Metadata Generate(Assembly assembly)
         {
-            var builder = new PocoMetadataBuilder(new EntityDescription());
+            var builder = new PocoMetadataBuilder(new NorthwindEntityDescriptor());
             var types = GetTypesFromAssembly(assembly);
             var metadata = builder.BuildMetadata(types);
             return metadata;
@@ -36,9 +36,7 @@ namespace Breeze.PocoMetadata
 
         private static Type[] GetTypesFromAssembly(Assembly assembly)
         {
-            var types = assembly.GetExportedTypes().Where(
-                        t =>
-                        (t.IsClass && !t.IsAbstract));
+            var types = assembly.GetExportedTypes().Where(t => (t.IsClass && !t.IsAbstract));
 
             return types.ToArray();
         }

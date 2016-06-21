@@ -40,7 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntityDescriptor.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Generator.cs" />
+    <Compile Include="NorthwindEntityDescriptor.cs" />
     <Compile Include="PocoMetadataBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

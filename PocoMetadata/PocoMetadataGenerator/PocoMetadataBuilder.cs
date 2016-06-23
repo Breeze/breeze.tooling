@@ -35,7 +35,7 @@ namespace Breeze.PocoMetadata
         {
             InitMap();
             _types = types.Where(t => _describer.Include(t)).ToList();
-            _entityTypes = types.Where(t => !_describer.IsComplexType(t)).ToList();
+            _entityTypes = _types.Where(t => !_describer.IsComplexType(t)).ToList();
 
             foreach (var t in _types)
             {
@@ -157,7 +157,7 @@ namespace Breeze.PocoMetadata
             foreach(var propertyInfo in propertyInfos)
             {
                 var elementType = GetElementType(propertyInfo.PropertyType);
-                if (_types.Contains(elementType) && !_describer.IsComplexType(elementType))
+                if (_entityTypes.Contains(elementType))
                 {
                     // association to another entity in the metadata list; skip until later
                 }
@@ -170,12 +170,6 @@ namespace Breeze.PocoMetadata
                     var dmap = MakeDataProperty(type, propertyInfo, isKey, isVersion);
                     if (dmap == null) continue; // excluded
                     dataList.Add(dmap);
-
-                    if (_describer.IsComplexType(elementType))
-                    {
-                        dmap["complexTypeName"] = elementType.Name + ":#" + elementType.Namespace;
-                        dmap.Remove("dataType");
-                    }
                 }
 
                 // add enum types to the global enum list
@@ -200,7 +194,7 @@ namespace Breeze.PocoMetadata
             foreach (var propertyInfo in propertyInfos)
             {
                 var elementType = GetElementType(propertyInfo.PropertyType);
-                if (_types.Contains(elementType) && !_describer.IsComplexType(elementType))
+                if (_entityTypes.Contains(elementType))
                 {
                     // now handle association to other entities
                     // navigation property
@@ -229,9 +223,23 @@ namespace Breeze.PocoMetadata
             var isNullable = nullableType != null || !propType.IsValueType;
             propType = nullableType ?? propType;
 
+
             var dmap = new Dictionary<string, object>();
             dmap.Add("nameOnServer", propertyInfo.Name);
-            dmap.Add("dataType", propType.Name);
+            var elementType = GetElementType(propType);
+
+            if (_describer.IsComplexType(elementType))
+            {
+                dmap.Add("complexTypeName", elementType.Name + ":#" + elementType.Namespace);
+            }
+            else
+            {
+                dmap.Add("dataType", elementType.Name);
+            }
+
+            if (elementType != propType)
+                dmap.Add("isScalar", false);
+
             if (!isNullable) dmap.Add("isNullable", false);
 
             AddAttributesToDataProperty(propertyInfo, dmap);
@@ -336,12 +344,23 @@ namespace Breeze.PocoMetadata
                 }
                 else
                 {
-                    if (_describer.ThrowOnForeignKeyError(containingType, propertyInfo))
+                    var handle = _describer.GetMissingFKHandling(containingType, propertyInfo);
+                    if (handle == MissingFKHandling.Error)
                     {
                         throw new Exception("Cannot find foreign key property on type " + containingType.Name + " for navigation property " + propertyInfo.Name);
                     }
-                    else
+                    else if (handle == MissingFKHandling.Log)
                     {
+                        Console.Error.WriteLine("Cannot find foreign key property on type " + containingType.Name + " for navigation property " + propertyInfo.Name);
+                        _map.ForeignKeyMap.Add(entityRelationship, "ERROR - NOT FOUND");
+                    }
+                    else if (handle == MissingFKHandling.Add)
+                    {
+                        // Add a new dataproperty to represent the foreign key
+                        var dataPropertyName = _describer.GetForeignKeyName(containingType, propertyInfo);
+                        var dmap = new Dictionary<string, object>();
+                        dmap.Add("nameOnServer", dataPropertyName);
+                        Console.Error.WriteLine("Cannot find foreign key property on type " + containingType.Name + " for navigation property " + propertyInfo.Name);
                         _map.ForeignKeyMap.Add(entityRelationship, "ERROR - NOT FOUND");
                     }
                 }
@@ -417,7 +436,7 @@ namespace Breeze.PocoMetadata
                 else if (name.Contains("Validat"))
                 {
                     // Assume some sort of validator.  Add all the properties of the attribute to the validation map
-                    // TODO - this only works if the custom validator is recognized by the Breeze client.  Otherwise it throws an error.
+                    // TODO - this only works if the custom validator is registered on the Breeze client.  Otherwise it throws an error.
                     //var validator = new Dictionary<string, object>() { { "name", camelCase(name) } };
                     //validators.Add(validator);
                     //foreach (var propertyInfo in attr.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.FlattenHierarchy))
@@ -518,9 +537,15 @@ namespace Breeze.PocoMetadata
         /// <returns></returns>
         private Type GetElementType(Type type)
         {
+            if (type == typeof(String)) return type;
             if (!IsCollectionType(type)) return type;
-            return type.HasElementType ? type.GetElementType() :
-                (type.IsGenericType ? type.GetGenericArguments()[0] : typeof(object));
+            if (type.HasElementType) return type.GetElementType();
+            if (type.IsGenericType)
+            {
+                var args = type.GetGenericArguments();
+                return args[args.Length - 1];
+            }
+            return typeof(object);
         }
 
         /// <summary>

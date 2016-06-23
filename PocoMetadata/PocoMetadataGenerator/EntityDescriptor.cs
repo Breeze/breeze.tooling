@@ -126,14 +126,14 @@ namespace Breeze.PocoMetadata
         }
 
         /// <summary>
-        /// Whether to throw an error if a foreign key data property cannot be found for the given navigation property
+        /// Determine the generator behaves if a foreign key data property cannot be found for the given navigation property.
         /// </summary>
         /// <param name="type">Entity type for which metadata is being generated</param>
         /// <param name="propertyInfo">Scalar navigation/association property</param>
-        /// <returns>true to throw an error, false to ignore and continue</returns>
-        public virtual bool ThrowOnForeignKeyError(Type type, PropertyInfo propertyInfo)
+        /// <returns>MissingFKHandling.Error; override to change this behavior</returns>
+        public virtual MissingFKHandling GetMissingFKHandling(Type type, PropertyInfo propertyInfo)
         {
-            return true;
+            return MissingFKHandling.Error;
         }
 
         /// <summary>
@@ -156,5 +156,18 @@ namespace Breeze.PocoMetadata
             }
         }
 
+    }
+
+    /// <summary>
+    /// How to handle a missing foreign key for a navigation property
+    /// </summary>
+    public enum MissingFKHandling
+    {
+        /// <summary>Throw an error and stop the metadata generation</summary>
+        Error,
+        /// <summary>Write the error to stderr and continue</summary>
+        Log,
+        /// <summary>Add a new foreign key using the expected name</summary>
+        Add
     }
 }

@@ -10,12 +10,12 @@ namespace Breeze.PocoMetadata
         /// <param name=""></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static object Get(this Dictionary<string, object> map, string key)
+        public static T Get<K,T>(this Dictionary<K, T> map, K key)
         {
-            object obj;
+            T obj;
             if (map.TryGetValue(key, out obj))
                 return obj;
-            return null;
+            return default(T);
         }
     }
 }

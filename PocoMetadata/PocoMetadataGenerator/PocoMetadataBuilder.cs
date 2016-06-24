@@ -148,6 +148,28 @@ namespace Breeze.PocoMetadata
                     keyProp.Remove("custom");
                 }
             }
+            else if (!type.IsAbstract && !_describer.IsComplexType(type))
+            {
+                // No key for an entity => error or add the key
+                var missingFKHandling = _describer.GetMissingPKHandling(type);
+                if (missingFKHandling == MissingKeyHandling.Error)
+                {
+                    throw new Exception("Key not found for entity " + classKey);
+                }
+                else if (missingFKHandling == MissingKeyHandling.Add)
+                {
+                    var dmap = new Dictionary<string, object>();
+                    dmap.Add("nameOnServer", type.Name + "GenKey");
+                    dmap.Add("dataType", "Guid"); // TODO make this configurable
+                    dmap.Add("isPartOfKey", true);
+                    dmap.Add("custom", "pk_generated");
+                    dataList.Add(dmap);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Key not found for entity " + classKey);
+                }
+            }
 
         }
 
@@ -358,7 +380,7 @@ namespace Breeze.PocoMetadata
                         dataProp = FindEntry(dataProperties, "nameOnServer", dataPropertyName);
                     }
                 }
-                if (dataProp == null && missingFKHandling == MissingFKHandling.Add)
+                if (dataProp == null && missingFKHandling == MissingKeyHandling.Add)
                 {
                     // Add a new dataproperty to represent the foreign key
                     var dataPropertyName = _describer.GetForeignKeyName(containingType, propertyInfo);
@@ -393,11 +415,11 @@ namespace Breeze.PocoMetadata
                 }
                 else
                 {
-                    if (missingFKHandling == MissingFKHandling.Error)
+                    if (missingFKHandling == MissingKeyHandling.Error)
                     {
                         throw new Exception("Cannot find foreign key property on type " + containingType.Name + " for navigation property " + propertyInfo.Name);
                     }
-                    else if (missingFKHandling == MissingFKHandling.Log)
+                    else if (missingFKHandling == MissingKeyHandling.Log)
                     {
                         Console.Error.WriteLine("Cannot find foreign key property on type " + containingType.Name + " for navigation property " + propertyInfo.Name);
                         _map.ForeignKeyMap.Add(entityRelationship, "ERROR - NOT FOUND");

@@ -130,11 +130,22 @@ namespace Breeze.PocoMetadata
         /// </summary>
         /// <param name="type">Entity type for which metadata is being generated</param>
         /// <param name="propertyInfo">Scalar navigation/association property</param>
-        /// <returns>MissingFKHandling.Error; override to change this behavior</returns>
-        public virtual MissingFKHandling GetMissingFKHandling(Type type, PropertyInfo propertyInfo)
+        /// <returns>MissingKeyHandling.Error; override to change this behavior</returns>
+        public virtual MissingKeyHandling GetMissingFKHandling(Type type, PropertyInfo propertyInfo)
         {
-            return MissingFKHandling.Error;
+            return MissingKeyHandling.Error;
         }
+
+        /// <summary>
+        /// Determine the generator behaves if a primary key is missing on an entity.
+        /// </summary>
+        /// <param name="type">Entity type for which metadata is being generated</param>
+        /// <returns>MissingKeyHandling.Error; override to change this behavior</returns>
+        public virtual MissingKeyHandling GetMissingPKHandling(Type type)
+        {
+            return MissingKeyHandling.Error;
+        }
+
 
         /// <summary>
         /// Lame pluralizer.  Assumes we just need to add a suffix.  
@@ -161,7 +172,7 @@ namespace Breeze.PocoMetadata
     /// <summary>
     /// How to handle a missing foreign key for a navigation property
     /// </summary>
-    public enum MissingFKHandling
+    public enum MissingKeyHandling
     {
         /// <summary>Throw an error and stop the metadata generation</summary>
         Error,

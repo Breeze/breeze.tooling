@@ -1,0 +1,5 @@
+-o ilems.json -i \bit\cohero\cohero-app-ilems\Cohero.ILEMS\bin\Cohero.ILEMS.DataAccess.CModel.dll
+
+-o northwind_nh.json -i \git\Breeze\breeze.server.net\Tests\Model_NorthwindIB_NH\bin\Debug\Model_NorthwindIB_NH.dll
+
+-o northwind_cf.json -i \git\Breeze\breeze.server.net\Tests\Model_NorthwindIB_CF.EF6\bin\Debug\Model_NorthwindIB_CF.EF6.dll

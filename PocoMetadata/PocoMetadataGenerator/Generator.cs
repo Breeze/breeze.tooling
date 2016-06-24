@@ -33,7 +33,7 @@ namespace Breeze.PocoMetadata
 
         private static Type[] GetTypesFromAssembly(Assembly assembly)
         {
-            var types = assembly.GetExportedTypes().Where(t => t.IsClass);
+            var types = assembly.GetExportedTypes();
 
             return types.ToArray();
         }

@@ -7,7 +7,7 @@ namespace Breeze.PocoMetadata
 {
     /// <summary>
     /// Builds a data structure containing the metadata required by Breeze.
-    /// <see cref="http://www.breezejs.com/documentation/breeze-metadata-format"/>
+    /// see http://www.breezejs.com/documentation/breeze-metadata-format 
     /// </summary>
     public class PocoMetadataBuilder
     {
@@ -20,6 +20,10 @@ namespace Breeze.PocoMetadata
         private List<Type> _entityTypes;
         private EntityDescriptor _describer;
 
+        /// <summary>
+        /// Create an instance using the given EntityDescriptor to resolve metadata
+        /// </summary>
+        /// <param name="describer"></param>
         public PocoMetadataBuilder(EntityDescriptor describer)
         {
             this._describer = describer;
@@ -29,7 +33,7 @@ namespace Breeze.PocoMetadata
         /// Build the Breeze metadata as a nested Dictionary.  
         /// The result can be converted to JSON and sent to the Breeze client.
         /// </summary>
-        /// <param name="classMeta">Entity metadata types to include in the metadata</param>
+        /// <param name="types">Entity metadata types to include in the metadata</param>
         /// <returns></returns>
         public Metadata BuildMetadata(IEnumerable<Type> types)
         {
@@ -565,8 +569,9 @@ namespace Breeze.PocoMetadata
         }
 
         /// <summary>
-        /// Return the element type of a collection type (array or IEnumerable<typeparamref name="T"/>)
+        /// Return the element type of a collection type (array or IEnumerable)
         /// For a plain IEnumerable, return System.Object
+        /// For a non-collection type, return the given type.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>

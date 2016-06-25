@@ -181,13 +181,9 @@ namespace Breeze.PocoMetadata
         void AddDataProperties(Type type, List<Dictionary<string, object>> dataList)
         {
             // Get properties for the given class
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var propertyInfos = GetPropertyInfos(type);
 
-            // Exclude properties that are declared on a base class that is also in the type list
-            // those properties will be defined in the metadata for the base class
-            propertyInfos = propertyInfos.Where(p => p.DeclaringType.Equals(type) || !_entityTypes.Contains(p.DeclaringType)).ToArray();
-
-            foreach(var propertyInfo in propertyInfos)
+            foreach (var propertyInfo in propertyInfos)
             {
                 var elementType = GetElementType(propertyInfo.PropertyType);
                 if (_entityTypes.Contains(elementType))
@@ -234,11 +230,7 @@ namespace Breeze.PocoMetadata
         void AddNavigationProperties(Type type, List<Dictionary<string, object>> dataList, List<Dictionary<string, object>> navList)
         {
             // Get properties for the given class
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            // Exclude properties that are declared on a base class that is also in the type list
-            // those properties will be defined in the metadata for the base class
-            propertyInfos = propertyInfos.Where(p => p.DeclaringType.Equals(type) || !_entityTypes.Contains(p.DeclaringType)).ToArray();
+            var propertyInfos = GetPropertyInfos(type);
 
             // Process to handle the association properties
             foreach (var propertyInfo in propertyInfos)
@@ -253,6 +245,34 @@ namespace Breeze.PocoMetadata
                     navList.Add(assProp);
                 }
             }
+        }
+
+        /// <summary>
+        /// Get the PropertyInfo definitions for the properties on the given type
+        /// Filter out properties that are defined on a base class that is also in the metadata
+        /// </summary>
+        /// <param name="type">Type for which to get the properties</param>
+        /// <returns></returns>
+        private PropertyInfo[] GetPropertyInfos(Type type)
+        {
+            // Get properties for the given class
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            // Exclude properties that are declared on a base class that is also in the type list
+            // those properties will be defined in the metadata for the base class
+            propertyInfos = propertyInfos.Where(p =>
+            {
+                if (!_entityTypes.Contains(p.DeclaringType)) return true;
+
+                if (!p.DeclaringType.Equals(type)) return false;
+
+                // Exclude overriding properties; they will be defined in the metadata for the base class
+                var getMethod = p.GetGetMethod(false);
+                if (getMethod.GetBaseDefinition().DeclaringType == getMethod.DeclaringType) return true;
+                return false;
+            }).ToArray();
+
+            return propertyInfos;
         }
 
         /// <summary>

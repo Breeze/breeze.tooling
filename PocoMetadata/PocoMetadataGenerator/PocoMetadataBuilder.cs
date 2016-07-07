@@ -148,7 +148,7 @@ namespace Breeze.PocoMetadata
                     keyProp.Remove("custom");
                 }
             }
-            else if (!type.IsAbstract && !_describer.IsComplexType(type))
+            else if (!type.IsAbstract && !_describer.IsComplexType(type) && !_entityTypes.Contains(type.BaseType))
             {
                 // No key for an entity => error or add the key
                 var missingFKHandling = _describer.GetMissingPKHandling(type);
@@ -243,6 +243,40 @@ namespace Breeze.PocoMetadata
                     var isKey = _describer.IsKeyProperty(type, propertyInfo);
                     var assProp = MakeAssociationProperty(type, propertyInfo, dataList, isKey);
                     navList.Add(assProp);
+                }
+            }
+
+            // now find & add missing nav properties identified by "__relatedType"
+            foreach (var dp in dataList)
+            {
+                var relatedType = (Type) dp.Get("__relatedType");
+                if (relatedType != null)
+                {
+                    var nmap = new Dictionary<string, object>();
+                    var name = (string) dp.Get("nameOnServer");
+                    if (name.EndsWith("Id"))
+                        name = name.Substring(0, name.Length - 2);
+                    else
+                        name = name + "Ref";
+
+                    nmap.Add("nameOnServer", name);
+                    nmap.Add("entityTypeName", relatedType.Name + ":#" + relatedType.Namespace);
+                    nmap.Add("isScalar", true);
+
+                    // the associationName must be the same at both ends of the association.
+                    nmap.Add("associationName", GetAssociationName(type.Name, relatedType.Name, null));
+
+                    var fkNames = new string[] { dp["nameOnServer"].ToString() };
+                    nmap["foreignKeyNamesOnServer"] = fkNames;
+                    nmap.Add("custom", "ref_generated"); // a clue to the client
+
+                    dp.Remove("__foreignKey");
+                    dp.Remove("__relatedType");
+
+                    // For many-to-one and one-to-one associations, save the relationship in ForeignKeyMap for re-establishing relationships during save
+                    var entityRelationship = type.FullName + '.' + name;
+                    _map.ForeignKeyMap.Add(entityRelationship, string.Join(",", fkNames));
+
                 }
             }
         }
@@ -426,6 +460,7 @@ namespace Breeze.PocoMetadata
                     fkNames = new string[] { dataProp["nameOnServer"].ToString() };
                     nmap["foreignKeyNamesOnServer"] = fkNames;
                     dataProp.Remove("__foreignKey");
+                    dataProp.Remove("__relatedType");
 
                     // if the navigation property is defined as part of the key, set the fk data property instead
                     if (isKey) dataProp["isPartOfKey"] = true;
@@ -496,6 +531,7 @@ namespace Breeze.PocoMetadata
                 }
                 else if (name == "StringLength")
                 {
+                    // ServiceStack [StringLength(max, min)]
                     dmap["maxLength"] = GetAttributeValue(attr, "MaximumLength");
                     var min = (int) GetAttributeValue(attr, "MinimumLength");
                     if (min > 0) dmap["minLength"] = min;
@@ -507,8 +543,28 @@ namespace Breeze.PocoMetadata
                 }
                 else if (name == "ForeignKey")
                 {
-                    // will be resolved & removed while processing navigation properties
-                    dmap["__foreignKey"] = GetAttributeValue(attr, "Name");
+                    var relatedType = GetAttributeValue(attr, "Type");
+                    if (relatedType != null)
+                    {
+                        // ServiceStack: foreign key points to related type
+                        dmap["__relatedType"] = relatedType;
+                    }
+                    else
+                    {
+                        // DataAnnotation: ForeignKey points to navigation property name
+                        // will be resolved & removed while processing navigation properties
+                        dmap["__foreignKey"] = GetAttributeValue(attr, "Name");
+                    }
+                }
+                else if (name == "References")
+                {
+                    // ServiceStack: like a foreign key, but no actual db fk relationship exists
+                    var relatedType = GetAttributeValue(attr, "Type");
+                    if (relatedType != null)
+                    {
+                        // ServiceStack: foreign key points to related type
+                        dmap["__relatedType"] = relatedType;
+                    }
                 }
                 else if (name == "InverseProperty")
                 {
@@ -564,6 +620,10 @@ namespace Breeze.PocoMetadata
                 {
                     nmap["custom"] = new Dictionary<string, object> { { "inverseProperty", GetAttributeValue(attr, "Property") } };
                 }
+                else if (name == "Reference")
+                {
+                    // ServiceStack: attribute indicates a navigation property
+                }
             }
         }
 
@@ -594,6 +654,7 @@ namespace Breeze.PocoMetadata
         private object GetAttributeValue(Attribute attr, string propertyName)
         {
             var propertyInfo = attr.GetType().GetProperty(propertyName);
+            if (propertyInfo == null) return null;
             var value = propertyInfo.GetValue(attr);
             return value;
         }

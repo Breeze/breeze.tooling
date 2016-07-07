@@ -269,6 +269,7 @@ namespace Breeze.PocoMetadata
                     var fkNames = new string[] { dp["nameOnServer"].ToString() };
                     nmap["foreignKeyNamesOnServer"] = fkNames;
                     nmap.Add("custom", "ref_generated"); // a clue to the client
+                    navList.Add(nmap);
 
                     dp.Remove("__foreignKey");
                     dp.Remove("__relatedType");

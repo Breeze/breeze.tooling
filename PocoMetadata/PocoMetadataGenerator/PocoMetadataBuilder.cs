@@ -309,10 +309,11 @@ namespace Breeze.PocoMetadata
                 if (!p.DeclaringType.Equals(type)) return false;
 
                 var getMethod = p.GetGetMethod(false);
-                if (getMethod.IsAbstract) return false;
+                //if (getMethod.IsAbstract) return false;
                 // Exclude overriding properties; they will be defined in the metadata for the base class
                 var baseMethod = getMethod.GetBaseDefinition();
-                if (baseMethod.DeclaringType == getMethod.DeclaringType || baseMethod.IsAbstract) return true;
+                if (baseMethod.DeclaringType == getMethod.DeclaringType) return true;
+                    //|| (baseMethod.IsAbstract && baseMethod.DeclaringType == type.BaseType)) return true;
                 return false;
             }).ToArray();
 

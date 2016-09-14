@@ -16,6 +16,7 @@ namespace Breeze.PocoMetadata
         private Dictionary<string, object> _resourceMap;
         private Dictionary<Type, Dictionary<string, object>> _typeMap;
         private List<Dictionary<string, object>> _enumList;
+        private List<Type> _allTypes; // even those excluded or replaced
         private List<Type> _types;
         private List<Type> _entityTypes;
         private EntityDescriptor _describer;
@@ -39,7 +40,8 @@ namespace Breeze.PocoMetadata
         public Metadata BuildMetadata(IEnumerable<Type> types)
         {
             InitMap();
-            _types = types.Where(t => _describer.Include(t)).ToList();
+            _allTypes = types.ToList();
+            _types = types.Select(t => _describer.Replace(t, types)).Distinct().Where(t => _describer.Include(t)).ToList();
             _entityTypes = _types.Where(t => !_describer.IsComplexType(t)).ToList();
             var navigations = new List<Dictionary<string, object>>();
 
@@ -103,6 +105,15 @@ namespace Breeze.PocoMetadata
 
             cmap.Add("shortName", type.Name);
             cmap.Add("namespace", type.Namespace);
+            if (!type.IsInterface)
+            {
+                var interfaces = type.GetInterfaces().Except(type.BaseType.GetInterfaces()).Where(t => _types.Contains(t)).Select(t => t.Name).ToList();
+                if (interfaces.Any())
+                {
+                    var custom = new Dictionary<string, object>() { { "interfaces", string.Join(", ", interfaces) } };
+                    cmap.Add("custom", custom);
+                }
+            }
 
             if (_describer.IsComplexType(type))
             {
@@ -193,7 +204,7 @@ namespace Breeze.PocoMetadata
             foreach (var propertyInfo in propertyInfos)
             {
                 var elementType = GetElementType(propertyInfo.PropertyType);
-                if (_entityTypes.Contains(elementType))
+                if (_entityTypes.Contains(elementType) || (_entityTypes.Contains(_describer.Replace(elementType, _allTypes))))
                 {
                     // association to another entity in the metadata list; skip until later
                 }
@@ -243,7 +254,7 @@ namespace Breeze.PocoMetadata
             foreach (var propertyInfo in propertyInfos)
             {
                 var elementType = GetElementType(propertyInfo.PropertyType);
-                if (_entityTypes.Contains(elementType))
+                if (_entityTypes.Contains(elementType) || (_entityTypes.Contains(_describer.Replace(elementType, _allTypes))))
                 {
                     // now handle association to other entities
                     // navigation property
@@ -259,6 +270,7 @@ namespace Breeze.PocoMetadata
                 var relatedType = (Type) dp.Get("__relatedType");
                 if (relatedType != null)
                 {
+                    relatedType = _describer.Replace(relatedType, _allTypes);
                     var nmap = new Dictionary<string, object>();
                     var name = (string) dp.Get("nameOnServer");
                     if (name.EndsWith("Id"))
@@ -406,6 +418,7 @@ namespace Breeze.PocoMetadata
             var propType = propertyInfo.PropertyType;
             var isCollection = IsCollectionType(propType);
             var relatedEntityType = isCollection ? GetElementType(propType) : propType;
+            relatedEntityType = _describer.Replace(relatedEntityType, _allTypes);
             nmap.Add("entityTypeName", relatedEntityType.Name + ":#" + relatedEntityType.Namespace);
             nmap.Add("isScalar", !isCollection);
 

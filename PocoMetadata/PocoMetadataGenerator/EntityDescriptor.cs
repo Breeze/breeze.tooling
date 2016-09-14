@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Breeze.PocoMetadata
@@ -32,6 +34,18 @@ namespace Breeze.PocoMetadata
         public virtual bool Include(Type type)
         {
             return true;
+        }
+
+        /// <summary>
+        /// Replace the given type wherever it appears in the metadata.
+        /// Can be used to replace an interface with a class.
+        /// </summary>
+        /// <param name="type">Type to replace</param>
+        /// <param name="types">List of available types provided to the PocoMetadataBuilder</param>
+        /// <returns>Replacement type</returns>
+        public virtual Type Replace(Type type, IEnumerable<Type> types)
+        {
+            return type;
         }
 
         /// <summary>

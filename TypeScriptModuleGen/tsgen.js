@@ -2,23 +2,21 @@
 var tsGenCore = require('./tsgen-core');
 
 try {
-  var config = argvToConfig;
+  var config = argvToConfig();
   tsGenCore.generate(config);
 } catch(e) {
-  console.log('Unexpected error occurred: ' + e.message);
+  console.log('Unexpected error occurred: ' + e.stack);
 } 
 
 function argvToConfig() {
   var config = {
     inputFileName: argv.i || argv.input,
     outputFolder: argv.o || argv.outputFolder,
-    camelCase: !!(argv.c || argv.camelCase),
-    baseClassFileName: argv.b || argv.baseClass,
     sourceFilesFolder: argv.s || argv.sourceFiles,
-  }
-
-  if (!inputFileName || !fs.existsSync(inputFileName)) {
-    throw new Error("Must specify a valid input file name.");
+    baseClassFileName: argv.b || argv.baseClass,
+    camelCase: !!(argv.c || argv.camelCase),
+    kebabCaseFileNames: !!(argv.k || argv.kebabCaseFileNames),
+    useEnumTypes: !!(argv.e || argv.useEnumTypes)
   }
   return config;
 }

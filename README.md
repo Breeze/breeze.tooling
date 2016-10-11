@@ -41,3 +41,27 @@ A PowerShell script is used to execute the Metadata generator and TypeScript gen
 ## Complete Tool Chain (Gulp)
 
 A Gulp script is used to execute the Metadata generator and TypeScript generator in the proper sequence with one command line.  See the [TypeScriptModuleGen](./TypeScriptModuleGen) README for usage.
+
+## Using the generated TypeScript code ##
+
+A comprehensive example that uses the tooling chain can be found here in the form of an Angular 2 application: https://github.com/Breeze/temphire.angular2 
+
+The usage of the generated TypeScript classes depends on whether the Entity Generator or the Module Generator was used.
+
+In both cases, the resulting scripts must be loaded. For the entity generator, this is typically done by statically loading the entity and helper scripts in the index.html.
+
+```
+<script src="path/to/generated/code/_RegistrationHelper.js"></script>
+<script src="path/to/generated/code/Customer.js"></script>
+```
+
+For the module generator, we import the necessary modules and then use a module loader like system.js or a bundler like webpack to load the scripts at runtime.
+
+```
+import { RegistrationHelper } from 'path/to/generated/code/registration-helper';
+import { Customer } from 'path/to/generated/code/entity-model';
+```
+
+However, in both cases the required step for the generated entity classes to be used by Breeze, is to invoke the registration helper, which registers all the constructor functions with Breeze.
+
+`RegistrationHelper.register(metadataStore);`

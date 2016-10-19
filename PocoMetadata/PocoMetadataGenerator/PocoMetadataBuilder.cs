@@ -621,9 +621,17 @@ namespace Breeze.PocoMetadata
                 else if (name == "StringLength")
                 {
                     // ServiceStack [StringLength(max, min)]
-                    dmap["maxLength"] = GetAttributeValue(attr, "MaximumLength");
+                    var max = GetAttributeValue(attr, "MaximumLength");
+                    dmap["maxLength"] = max;
+                    var validator = new Dictionary<string, object>() { { "name", "maxLength" }, { "maxLength", max } };
+                    validators.Add(validator);
                     var min = (int) GetAttributeValue(attr, "MinimumLength");
-                    if (min > 0) dmap["minLength"] = min;
+                    if (min > 0)
+                    {
+                        dmap["minLength"] = min;
+                        var minValidator = new Dictionary<string, object>() { { "name", "minLength" }, { "minLength", min } };
+                        validators.Add(minValidator);
+                    }
                 }
                 else if (name == "DatabaseGenerated")
                 {

@@ -1,7 +1,7 @@
 {{#if baseClass}}
-import { {{baseClass}} } from './{{baseClass}}';
+import { {{baseClass}} } from './{{baseClassModuleName}}';
 {{/if}}
-{{#imports}}import { {{path}} } from './{{path}}';
+{{#imports}}import { {{path}} } from './{{moduleName}}';
 {{/imports}}
 
 /// <code-import> Place custom imports between <code-import> tags

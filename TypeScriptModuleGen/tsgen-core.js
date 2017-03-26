@@ -13,7 +13,7 @@ module.exports = {
  * @param {string}  config.inputFileName:      Breeze metadata file
  * @param {string}  config.outputFolder:       Where to write TypeScript files (defaults to current folder)
  * @param {string}  config.sourceFilesFolder:  Location of existing TS entity files (defaults to outputFolder)
- * @param {string}  config.baseClassName:      Base class for TS entities
+ * @param {string}  config.baseClassFileName:      Base class for TS entities
  * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
@@ -32,7 +32,7 @@ function generate(config) {
   console.log('Input: ' + path.resolve(config.inputFileName));
   console.log('Source: ' + path.resolve(config.sourceFilesFolder));
   console.log('Output: ' + path.resolve(config.outputFolder));
-  console.log('BaseClass: ' + config.baseClassName);
+  console.log('BaseClass: ' + config.baseClassFileName);
   console.log('camelCase: ' + !!config.camelCase);
   console.log('kebabCaseFileNames: ' + !!config.kebabCaseFileNames);
   console.log('useEnumTypes: ' + !!config.useEnumTypes);
@@ -124,7 +124,7 @@ function processRawMetadata(metadataStore, config) {
     });
   }
 
-  var baseClass = config.baseClassName;
+  var baseClass = config.baseClassFileName;
   if (baseClass) {
     console.log('Injected base class: ' + baseClass);
   }

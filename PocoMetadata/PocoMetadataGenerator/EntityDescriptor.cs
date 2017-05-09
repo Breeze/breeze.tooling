@@ -140,6 +140,21 @@ namespace Breeze.PocoMetadata
         }
 
         /// <summary>
+        /// Return the name of the inverse relationship property for a navigation property.  
+        /// This is a property on the related type that points back to the containing type.
+        /// </summary>
+        /// <param name="containingType">Type containing the propertyInfo</param>
+        /// <param name="propertyName">Navigation property pointing to relatedType</param>
+        /// <param name="relatedType">Type related to containingType by propertyInfo</param>
+        /// <returns>Name of property on relatedType that points back to containingType, 
+        ///     or empty string to indicate that there is no inverse property,
+        ///     or null to let the inverse be inferred automatically</returns>
+        public virtual string GetInversePropertyName(Type containingType, string propertyName, Type relatedType)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Determine the generator behaves if a foreign key data property cannot be found for the given navigation property.
         /// </summary>
         /// <param name="type">Entity type for which metadata is being generated</param>

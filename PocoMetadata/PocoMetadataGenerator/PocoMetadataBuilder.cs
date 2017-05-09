@@ -283,7 +283,7 @@ namespace Breeze.PocoMetadata
                     nmap.Add("isScalar", true);
 
                     // Add assocation.  The associationName will be resolved later, when both ends are known.
-                    nmap.Add("__association", new Association(type, relatedType, null));
+                    nmap.Add("__association", new Association(type, relatedType, name));
 
                     var fkNames = new string[] { dp["nameOnServer"].ToString() };
                     nmap["foreignKeyNamesOnServer"] = fkNames;
@@ -427,8 +427,7 @@ namespace Breeze.PocoMetadata
             var entityRelationship = containingType.FullName + '.' + name;
 
             // Add assocation.  The associationName will be resolved later, when both ends are known.
-            nmap.Add("__association", new Association(containingType, relatedEntityType, null));
-
+            nmap.Add("__association", new Association(containingType, relatedEntityType, name));
 
             if (!isCollection)
             {
@@ -438,11 +437,11 @@ namespace Breeze.PocoMetadata
                 Dictionary<string, object> dataProp = null;
                 // Find the matching key in the data properties for this entity
                 // First see if a data property was identified on an attribute of the navigation property
-                object fkNames = nmap.Get("foreignKeyNamesOnServer");
+                var fkNames = nmap.Get("foreignKeyNamesOnServer") as string[];
                 if (fkNames != null)
                 {
                     // find the matching data prop using its fk name
-                    var fkName = ((string[])fkNames)[0];
+                    var fkName = (fkNames)[0];
                     dataProp = FindEntry(dataProperties, "nameOnServer", fkName);
                 }
                 if (dataProp == null)
@@ -516,25 +515,36 @@ namespace Breeze.PocoMetadata
         /// Try to find common names for both ends of an association
         /// </summary>
         /// <param name="navigations"></param>
-        static void ResolveAssociations(List<Dictionary<string, object>> navigations)
+        void ResolveAssociations(List<Dictionary<string, object>> navigations)
         {
             foreach (var nav in navigations)
             {
                 if (nav.ContainsKey("associationName")) continue; // skip if already processed
-                var unmatched = navigations.Where(n => n != nav && (!n.ContainsKey("associationName")));
-
+                var unmatched = navigations.Where(n => n != nav && (!n.ContainsKey("associationName"))).ToList();
+                string name = (string) nav["nameOnServer"];
                 var ass = (Association)nav["__association"];
+                Dictionary<string, object> inverse = null;
 
-                var inverse = unmatched.Where(n => {
-                    var na = (Association)n["__association"];
-                    return ass.TypesEqual(na.containingType, na.relatedType, na.fkNames);
-                }).FirstOrDefault();
+                var inverseName = _describer.GetInversePropertyName(ass.containingType, ass.propertyName, ass.relatedType);
 
-                if (inverse == null)
+                if (inverseName == "") continue; // skip because descriptor says there is no inverse for this property
+
+                if (inverseName != null)
                 {
                     inverse = unmatched.Where(n => {
                         var na = (Association)n["__association"];
-                        return ass.TypesEqual(na.containingType, na.relatedType.BaseType, na.fkNames);
+                        var nm = (string)n["nameOnServer"];
+                        return ass.TypesEqual(na.containingType, na.relatedType) &&
+                            nm == inverseName;
+                    }).FirstOrDefault();
+                }
+
+                if (inverse == null)
+                {
+                    inverse = unmatched.Where(n =>
+                    {
+                        var na = (Association)n["__association"];
+                        return ass.TypesEqual(na.containingType, na.relatedType);
                     }).FirstOrDefault();
                 }
 
@@ -542,7 +552,15 @@ namespace Breeze.PocoMetadata
                 {
                     inverse = unmatched.Where(n => {
                         var na = (Association)n["__association"];
-                        return na.TypesEqual(ass.containingType, ass.relatedType.BaseType, na.fkNames);
+                        return ass.TypesEqual(na.containingType, na.relatedType.BaseType);
+                    }).FirstOrDefault();
+                }
+
+                if (inverse == null)
+                {
+                    inverse = unmatched.Where(n => {
+                        var na = (Association)n["__association"];
+                        return na.TypesEqual(ass.containingType, ass.relatedType.BaseType);
                     }).FirstOrDefault();
                 }
 
@@ -551,7 +569,7 @@ namespace Breeze.PocoMetadata
                 if (inverse != null)
                 {
                     var iass = (Association)inverse["__association"];
-                    var associationName = GetAssociationName(iass.containingType, iass.relatedType, iass.fkNames);
+                    var associationName = GetAssociationName(iass.containingType, iass.relatedType, iass.propertyName);
                     inverse["associationName"] = associationName;
                     nav["associationName"] = associationName;
                     inverse.Remove("__association");
@@ -564,7 +582,7 @@ namespace Breeze.PocoMetadata
             {
                 if (nav.ContainsKey("associationName")) continue; // skip if already processed
                 var ass = (Association)nav["__association"];
-                var associationName = GetAssociationName(ass.containingType, ass.relatedType, ass.fkNames);
+                var associationName = GetAssociationName(ass.containingType, ass.relatedType, ass.propertyName);
                 nav["associationName"] = associationName;
                 nav.Remove("__association");
                 var cust = (string)nav.Get("custom");
@@ -794,18 +812,18 @@ namespace Breeze.PocoMetadata
         /// </summary>
         /// <param name="type1">Containing type</param>
         /// <param name="type2">Related type</param>
-        /// <param name="fkNames">Used to ensure the association name is unique for a type</param>
+        /// <param name="propName">Property name relating the types.  Used to ensure the association name is unique for a type</param>
         /// <returns></returns>
-        static string GetAssociationName(Type type1, Type type2, string[] fkNames)
+        static string GetAssociationName(Type type1, Type type2, string propName)
         {
             if (type1 == null || type2 == null) return null;
             string name1 = type1.Name;
             string name2 = type2.Name;
-            var cols = (fkNames != null) ? "_" + string.Join(" ", fkNames) : "";
+            var cols = propName; // (fkNames != null) ? "_" + string.Join(" ", fkNames) : "";
             if (name1.CompareTo(name2) < 0)
-                return FK + name1 + '_' + name2 + cols;
+                return FK + name1 + '_' + name2 + "_" + cols;
             else
-                return FK + name2 + '_' + name1 + cols;
+                return FK + name2 + '_' + name1 + "_" + cols;
         }
         const string FK = "AN_";
 
@@ -869,23 +887,23 @@ namespace Breeze.PocoMetadata
     /// </summary>
     class Association
     {
-        public Association(Type type, Type related, string[] fkNames = null)
+        public Association(Type type, Type related, string propertyName)
         {
             this.containingType = type;
             this.relatedType = related;
-            this.fkNames = fkNames;
+            this.propertyName = propertyName;
         }
         public Type containingType;
         public Type relatedType;
-        public string[] fkNames;
+        public string propertyName;
 
         /// <summary>
         /// Return true if the types match or their base types match
         /// </summary>
         /// <returns></returns>
-        public bool TypesEqual(Type t1, Type t2, string[] fkNames)
+        public bool TypesEqual(Type t1, Type t2)
         {
-            var a1 = new Association(t1, t2, fkNames);
+            var a1 = new Association(t1, t2, null);
             return this.Equals(a1);
         }
 
@@ -900,10 +918,7 @@ namespace Breeze.PocoMetadata
                 ((assn.containingType == this.relatedType) &&
                 (assn.relatedType == this.containingType)))
             {
-                if (assn.fkNames == this.fkNames) return true;
-                if (assn.fkNames == null || this.fkNames == null) return false;
-                if (string.Join(",", assn.fkNames).Equals(string.Join(",", this.fkNames))) return true;
-                return false;
+                return true;
             }
             return false;
         }
@@ -912,7 +927,7 @@ namespace Breeze.PocoMetadata
         {
             var h1 = containingType != null ? containingType.GetHashCode() : 0;
             var h2 = relatedType != null ? relatedType.GetHashCode() : 0;
-            var h3 = fkNames != null ? fkNames.GetHashCode() : 0;
+            var h3 = propertyName != null ? propertyName.GetHashCode() : 0;
             return h1/3 + h2/3 + h3/3;
         }
     }

@@ -8,21 +8,13 @@ module.exports = {
   generate: generate
 };
 
-/** Generate the TypeScript entity files from Breeze metadata
- * @param {Object}  config 
- * @param {string}  config.inputFileName:      Breeze metadata file
- * @param {string}  config.outputFolder:       Where to write TypeScript files (defaults to current folder)
- * @param {string}  config.sourceFilesFolder:  Location of existing TS entity files (defaults to outputFolder)
- * @param {string}  config.baseClassFileName:      Base class for TS entities
- * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
- * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
- * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
- */
+// config structure
+//   inputFileName:
+//   outputFolder:
+//   camelCase:
+//   baseClassFileName:
+//   sourceFilesFolder:
 function generate(config) {
-  console.log(config);
-  if (!config.inputFileName || !fs.existsSync(config.inputFileName)) {
-    throw new Error("Must specify a valid input file name");
-  }
   config.outputFolder = config.outputFolder || '.';
   config.sourceFilesFolder = config.sourceFilesFolder || config.outputFolder;
   if (config.camelCase) {
@@ -32,14 +24,7 @@ function generate(config) {
   console.log('Input: ' + path.resolve(config.inputFileName));
   console.log('Source: ' + path.resolve(config.sourceFilesFolder));
   console.log('Output: ' + path.resolve(config.outputFolder));
-  console.log('BaseClass: ' + config.baseClassFileName);
-  console.log('camelCase: ' + !!config.camelCase);
-  console.log('kebabCaseFileNames: ' + !!config.kebabCaseFileNames);
-  console.log('useEnumTypes: ' + !!config.useEnumTypes);
-
-  handlebars.registerHelper('camelCase', function(str) {
-    return _.camelCase(str);
-  });
+  console.log('CamelCase: ' + !!config.camelCase);
 
   // Load metadata.
   var metadata = fs.readFileSync(config.inputFileName, 'utf8');
@@ -47,19 +32,13 @@ function generate(config) {
 
   // Import metadata
   var metadataStore = breeze.MetadataStore.importMetadata(metadata);
-
-  if (config.useEnumTypes) {
-    // until breeze adds the enumTypes to the metadataStore
-    var metajson = JSON.parse(metadata);
-    var enumTypes = metajson.enumTypes;
-    metadataStore.enumTypes = enumTypes;
-  }
-
   processRawMetadata(metadataStore, config);
   //console.log(metadataStore.getEntityTypes());
 
   // Load and compile typescript template
-  var compiledTemplate = compileTemplate('entity.template.txt');
+  var templateFilename = path.resolve(__dirname, 'entity.template.txt');
+  var template = fs.readFileSync(templateFilename, 'utf8');
+  var compiledTemplate = handlebars.compile(template);
 
   // Generate typescript classes for each entity
   metadataStore.getEntityTypes().forEach(function (entityType) {
@@ -73,64 +52,82 @@ function generate(config) {
     }
   });
 
+  // Generate registration helper
   metadataStore.generatedAt = new Date();
   metadataStore.namespace = metadataStore.getEntityTypes()[0].namespace;
-
-  // Generate registration helper
-  compiledTemplate = compileTemplate('register.template.txt');
+  templateFilename = path.resolve(__dirname, 'register.template.txt');
+  template = fs.readFileSync(templateFilename, 'utf8');
+  compiledTemplate = handlebars.compile(template);
   var ts = compiledTemplate(metadataStore);
-  var filename = fileNameCase('RegistrationHelper', config) + '.ts';
-  writeIfChanged(filename, ts, config);
 
+  var filename = fileNameCase('RegistrationHelper', config) + '.ts';
+  var regHelperSourceFilename = path.resolve(config.sourceFilesFolder, filename);
+  var regHelperFilename = path.resolve(config.outputFolder, filename);
+  var regHelperOriginalContent;
+  if (fs.existsSync(regHelperSourceFilename)) {
+    regHelperOriginalContent = fs.readFileSync(regHelperSourceFilename, 'utf8');
+  }
+  // Don't overwrite file if nothing has changed.
+  if (regHelperOriginalContent !== ts) {
+    fs.writeFileSync(regHelperFilename, ts, 'utf8');
+  } else {
+    console.log(regHelperSourceFilename + " hasn't changed. Skipping...");
+  }
 
   // Generate entity model
-  compiledTemplate = compileTemplate('entityModel.template.txt');
+  metadataStore.generatedAt = new Date();
+  metadataStore.namespace = metadataStore.getEntityTypes()[0].namespace;
+  templateFilename = path.resolve(__dirname, 'entityModel.template.txt');
+  template = fs.readFileSync(templateFilename, 'utf8');
+  compiledTemplate = handlebars.compile(template);
   var ts = compiledTemplate(metadataStore);
-  var filename = fileNameCase('EntityModel', config) + '.ts';
-  writeIfChanged(filename, ts, config);
 
+  var filename = fileNameCase('EntityModel', config) + '.ts';
+  var entityModelSourceFilename = path.resolve(config.sourceFilesFolder, filename);
+  var entityModelFilename = path.resolve(config.outputFolder, filename);
+  var entityModelOriginalContent;
+  if (fs.existsSync(entityModelSourceFilename)) {
+    entityModelOriginalContent = fs.readFileSync(entityModelSourceFilename, 'utf8');
+  }
+  // Don't overwrite file if nothing has changed.
+  if (entityModelOriginalContent !== ts) {
+    fs.writeFileSync(entityModelFilename, ts, 'utf8');
+  } else {
+    console.log(entityModelSourceFilename + " hasn't changed. Skipping...");
+  }  
 
   // Generate metadata.ts
-  compiledTemplate = compileTemplate('metadata.template.txt');
+  templateFilename = path.resolve(__dirname, 'metadata.template.txt');
+  template = fs.readFileSync(templateFilename, 'utf8');
+  compiledTemplate = handlebars.compile(template);
   var ts = compiledTemplate({metadata: metadata});
-  var filename = fileNameCase('Metadata', config) + '.ts';
-  writeIfChanged(filename, ts, config);
 
-  // Generate enums.ts
-  if (config.useEnumTypes) {
-    compiledTemplate = compileTemplate('enum.template.txt');
-    var ts = compiledTemplate(metadataStore);
-    var filename = fileNameCase('Enums', config) + '.ts';
-    writeIfChanged(filename, ts, config);
+  var filename = fileNameCase('Metadata', config) + '.ts';
+  var metadataSourceFilename = path.resolve(config.sourceFilesFolder, filename);
+  var metadataFilename = path.resolve(config.outputFolder, filename);
+  var metadataOriginalContent;
+  if (fs.existsSync(metadataSourceFilename)) {
+    metadataOriginalContent = fs.readFileSync(metadataSourceFilename, 'utf8');
+  }
+  // Don't overwrite file if nothing has changed.
+  if (metadataOriginalContent !== ts) {
+    fs.writeFileSync(metadataFilename, ts, 'utf8');
+  } else {
+    console.log(metadataSourceFilename + " hasn't changed. Skipping...");
   }
 }
 
-/**
- * Preprocess the metadata for each entity before file generation.
- * - Remove properties that are defined on base classes
- * - Set the root base class
- * - Set the imports using hasDependency
- * - Get the custom code blocks from existing file
- */
 function processRawMetadata(metadataStore, config) {
   var entityTypes = metadataStore.getEntityTypes();
   metadataStore.modules = entityTypes.map(function (entityType) {
     return { entityType: entityType, path: entityType.shortName, moduleName: fileNameCase(entityType.shortName, config) };
   });
 
-  if (config.useEnumTypes) {
-    metadataStore.enumModules = metadataStore.enumTypes.map(function (enumType) {
-      return { entityType: enumType, path: enumType.shortName, moduleName: fileNameCase("Enums", config) };
-    });
-  }
-
-  var baseClass = config.baseClassFileName;
+  var baseClass = config.baseClassName;
   if (baseClass) {
     console.log('Injected base class: ' + baseClass);
   }
 
-  var allModules = metadataStore.modules.concat(metadataStore.enumModules || []);
-  
   entityTypes.forEach(function (entityType) {
     if (!entityType.getProperties) {
       entityType.getProperties = function () {
@@ -141,7 +138,7 @@ function processRawMetadata(metadataStore, config) {
       return !property.baseProperty;
     });
     entityType.properties = properties.map(function (property) {
-      return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes) };
+      return { name: property.name, dataType: convertDataType(metadataStore, property) };
     });
     if (entityType.baseEntityType) {
       // entityType.baseClass = entityType.baseEntityType.namespace + '.' + entityType.baseEntityType.shortName;
@@ -154,7 +151,7 @@ function processRawMetadata(metadataStore, config) {
       //});
     }
     entityType.baseClassModuleName = fileNameCase(entityType.baseClass, config);
-    entityType.imports = allModules.filter(function (module) {
+    entityType.imports = metadataStore.modules.filter(function (module) {
       // baseClass is already imported in the template
       if (module.entityType === entityType || module.path === entityType.baseClass) {
         return false;
@@ -195,7 +192,6 @@ function processRawMetadata(metadataStore, config) {
   });
 }
 
-/** Get the contents of a custom code block */
 function extractSection(content, tag, sourceFileName) {
   var matches = content.match('\/\/\/[ \t]*<' + tag + '>.*');
   if (matches && matches.length !== 0) {
@@ -212,8 +208,7 @@ function extractSection(content, tag, sourceFileName) {
   return null;
 }
 
-/** Get the TypeScript data type of the given property */
-function convertDataType(metadataStore, property, useEnumTypes) {
+function convertDataType(metadataStore, property) {
   if (property.isNavigationProperty) {
     // var navigationType = property.entityType.namespace + '.' + property.entityType.shortName;
     var navigationType = property.entityType.shortName;
@@ -228,10 +223,6 @@ function convertDataType(metadataStore, property, useEnumTypes) {
     // return complexType.namespace + '.' + complexType.shortName;
     if (!complexType) console.log("Cannot find complex type " + property.complexTypeName);
     return complexType.shortName;
-  }
-
-  if (useEnumTypes && property.enumType) {
-    return property.enumType;
   }
 
   var dataType = property.dataType;
@@ -250,7 +241,6 @@ function convertDataType(metadataStore, property, useEnumTypes) {
   return 'any';
 }
 
-/** Get the EntityType of the given name */
 function getEntityType(metadataStore, name) {
   var types = metadataStore.getEntityTypes().filter(function (entityType) {
     return entityType.name === name;
@@ -262,16 +252,9 @@ function getEntityType(metadataStore, name) {
   return null;
 }
 
-/** Determine if entityType has a property of type dependentEntityType */
 function hasDependency(entityType, dependentEntityType) {
   var complexMatches = entityType.dataProperties.filter(function (property) {
-    if (property.baseProperty) {
-      return false;
-    } 
-    if (property.isComplexProperty && property.complexTypeName === dependentEntityType.name) return true;
-    if (property.enumType === dependentEntityType.shortName) {
-      return true;
-    }
+    return !property.isInherited && property.isComplexProperty && property.complexTypeName === dependentEntityType.name;
   });
 
   if (complexMatches.length !== 0) {
@@ -283,9 +266,7 @@ function hasDependency(entityType, dependentEntityType) {
   }).length !== 0
 }
 
-/** Set the correct format of the filename */
 function fileNameCase(filename, config) {
-  if (!filename) return filename;
   if (config.kebabCaseFileNames) {
     if (filename.startsWith("I")) {
       return "i" + _.kebabCase(filename.substring(1)).toLowerCase();
@@ -296,26 +277,4 @@ function fileNameCase(filename, config) {
   return filename;
 }
 
-/** Load and compile the template from the given file */
-function compileTemplate(filename) {
-  var templateFilename = path.resolve(__dirname, filename);
-  var template = fs.readFileSync(templateFilename, 'utf8');
-  return handlebars.compile(template);
-}
 
-/** Write to the output file if the content is different from the source file */
-function writeIfChanged(filename, content, config) {
-  var sourceFilename = path.resolve(config.sourceFilesFolder, filename);
-  var outFilename = path.resolve(config.outputFolder, filename);
-  var originalContent;
-  if (fs.existsSync(sourceFilename)) {
-    originalContent = fs.readFileSync(sourceFilename, 'utf8');
-  }
-  // Don't overwrite file if nothing has changed.
-  if (originalContent !== content) {
-    fs.writeFileSync(outFilename, content, 'utf8');
-  } else {
-    console.log(sourceFilename + " hasn't changed. Skipping...");
-  }
-  
-}

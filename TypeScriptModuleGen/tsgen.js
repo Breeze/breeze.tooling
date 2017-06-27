@@ -13,7 +13,7 @@ function argvToConfig() {
     inputFileName: argv.i || argv.input,
     outputFolder: argv.o || argv.outputFolder,
     sourceFilesFolder: argv.s || argv.sourceFiles,
-    baseClassFileName: argv.b || argv.baseClass,
+    baseClassName: argv.b || argv.baseClass,
     camelCase: !!(argv.c || argv.camelCase),
     kebabCaseFileNames: !!(argv.k || argv.kebabCaseFileNames),
     useEnumTypes: !!(argv.e || argv.useEnumTypes)

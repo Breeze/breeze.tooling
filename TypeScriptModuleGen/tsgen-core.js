@@ -8,6 +8,37 @@ module.exports = {
   generate: generate
 };
 
+function mapObject(obj, customizer) {
+    if (!obj)
+        return obj;
+    obj = _.mapValues(obj, function (value, key, obj) {
+        return customizer ? customizer(value, key, obj) || mapValue(value, customizer) : mapValue(value);
+    });
+    return obj;
+}
+
+function mapValue(value, customizer) {
+    if (value === null || value === undefined)
+        return value;
+    if (Array.isArray(value)) {
+        return value.map(function (item) { return mapValue(item, customizer); });
+    }
+    if (typeof value === 'object') {
+        return mapObject(value, customizer);
+    }
+    return value;
+}
+
+function ignoreValidators(metadata) {
+    // Ignore validators. We don't need them and if they don't exist the metadata will fail to load.
+    var m = mapObject(JSON.parse(metadata), function (value, key) {
+        if (key === 'validators') {
+            return [];
+        }
+    });
+    return JSON.stringify(m);
+}
+
 // config structure
 //   inputFileName:
 //   outputFolder:
@@ -31,7 +62,7 @@ function generate(config) {
   //console.log(metadata);
 
   // Import metadata
-  var metadataStore = breeze.MetadataStore.importMetadata(metadata);
+  var metadataStore = breeze.MetadataStore.importMetadata(ignoreValidators(metadata));
   processRawMetadata(metadataStore, config);
   //console.log(metadataStore.getEntityTypes());
 

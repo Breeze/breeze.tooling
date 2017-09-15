@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
@@ -189,6 +190,25 @@ namespace Breeze.PocoMetadata
                 }
             }
 
+            // Validators
+            var validators = new List<Dictionary<string, object>>();
+            var attributes = type.GetCustomAttributes();
+            foreach (var attr in attributes)
+            {
+                if (attr is ValidationAttribute)
+                {
+                    var validator = _describer.MapValidationAttribute((ValidationAttribute)attr);
+                    if (validator != null)
+                    {
+                        validators.Add(validator);
+                    }
+                }
+            }
+
+            if (validators.Any())
+            {
+                cmap.Add("validators", validators);
+            }
         }
 
         /// <summary>
@@ -369,7 +389,7 @@ namespace Breeze.PocoMetadata
 
             if (!isNullable) dmap.Add("isNullable", false);
 
-            AddAttributesToDataProperty(propertyInfo, dmap);
+            AddAttributesToDataProperty(propertyInfo, dmap, _describer);
 
             if (isKey) dmap["isPartOfKey"] = true;
             if (isVersion) dmap["concurrencyMode"] = "Fixed";
@@ -598,7 +618,8 @@ namespace Breeze.PocoMetadata
         /// </summary>
         /// <param name="memberInfo">Property or field of the class for which metadata is being generated</param>
         /// <param name="dmap">Data property definition</param>
-        private static void AddAttributesToDataProperty(MemberInfo memberInfo, Dictionary<string, object> dmap)
+        /// <param name="describer">The current EntityDescriptor</param>
+        private static void AddAttributesToDataProperty(MemberInfo memberInfo, Dictionary<string, object> dmap, EntityDescriptor describer)
         {
             var validators = new List<Dictionary<string, object>>();
             var attributes = memberInfo.GetCustomAttributes();
@@ -685,20 +706,20 @@ namespace Breeze.PocoMetadata
                 {
                     dmap["custom"] = new Dictionary<string, object> { { "inverseProperty", GetAttributeValue(attr, "Property") } };
                 }
-                else if (name.Contains("Validat"))
+                else if (attr is RegularExpressionAttribute)
                 {
-                    // Assume some sort of validator.  Add all the properties of the attribute to the validation map
-                    // TODO - this only works if the custom validator is registered on the Breeze client.  Otherwise it throws an error.
-                    //var validator = new Dictionary<string, object>() { { "name", camelCase(name) } };
-                    //validators.Add(validator);
-                    //foreach (var propertyInfo in attr.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.FlattenHierarchy))
-                    //{
-                    //    var value = propertyInfo.GetValue(attr);
-                    //    if (value != null)
-                    //    {
-                    //        validator[camelCase(propertyInfo.Name)] = value;
-                    //    }
-                    //}
+                    var pattern = GetAttributeValue(attr, "Pattern");
+                    var validator = new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } };
+                    validators.Add(validator);
+                }
+                else if (attr is ValidationAttribute)
+                {
+                    // Mapping custom validation attributes to client validators
+                    var validator = describer.MapValidationAttribute((ValidationAttribute)attr);
+                    if (validator != null)
+                    {
+                        validators.Add(validator);
+                    }
                 }
             }
 

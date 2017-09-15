@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
@@ -196,6 +197,15 @@ namespace Breeze.PocoMetadata
             }
         }
 
+        /// <summary>
+        /// Maps a DataAnnotations validation attribute to the corresponding client validation descriptor
+        /// </summary>
+        /// <param name="attr">The validation attribute</param>
+        /// <returns>Validator descriptor</returns>
+        public virtual Dictionary<string, object> MapValidationAttribute(ValidationAttribute attr)
+        {
+            return null;
+        }
     }
 
     /// <summary>

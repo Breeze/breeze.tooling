@@ -706,16 +706,16 @@ namespace Breeze.PocoMetadata
                 {
                     dmap["custom"] = new Dictionary<string, object> { { "inverseProperty", GetAttributeValue(attr, "Property") } };
                 }
-                else if (attr is RegularExpressionAttribute)
-                {
-                    var pattern = GetAttributeValue(attr, "Pattern");
-                    var validator = new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } };
-                    validators.Add(validator);
-                }
                 else if (attr is ValidationAttribute)
                 {
                     // Mapping custom validation attributes to client validators
                     var validator = describer.MapValidationAttribute((ValidationAttribute)attr);
+                    if (validator == null && attr is RegularExpressionAttribute)
+                    {
+                        var pattern = GetAttributeValue(attr, "Pattern");
+                        validator = new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } };
+                    }
+
                     if (validator != null)
                     {
                         validators.Add(validator);

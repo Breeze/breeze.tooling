@@ -197,10 +197,10 @@ namespace Breeze.PocoMetadata
             {
                 if (attr is ValidationAttribute)
                 {
-                    var validator = _describer.MapValidationAttribute((ValidationAttribute)attr);
+                    var validator = _describer.MapValidationAttribute((ValidationAttribute)attr, cmap);
                     if (validator != null)
                     {
-                        validators.Add(validator);
+                        validators.AddRange(validator);
                     }
                 }
             }
@@ -709,16 +709,16 @@ namespace Breeze.PocoMetadata
                 else if (attr is ValidationAttribute)
                 {
                     // Mapping custom validation attributes to client validators
-                    var validator = describer.MapValidationAttribute((ValidationAttribute)attr);
+                    var validator = describer.MapValidationAttribute((ValidationAttribute)attr, dmap);
                     if (validator == null && attr is RegularExpressionAttribute)
                     {
                         var pattern = GetAttributeValue(attr, "Pattern");
-                        validator = new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } };
+                        validator = new[] { new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } } };
                     }
 
                     if (validator != null)
                     {
-                        validators.Add(validator);
+                        validators.AddRange(validator);
                     }
                 }
             }
@@ -847,26 +847,6 @@ namespace Breeze.PocoMetadata
                 return FK + name2 + '_' + name1 + "_" + cols;
         }
         const string FK = "AN_";
-
-        /// <summary>
-        /// Change first letter to lowercase
-        /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        private string camelCase(string s)
-        {
-            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
-            {
-                return s;
-            }
-            string str = char.ToLower(s[0]).ToString();
-            if (s.Length > 1)
-            {
-                str = str + s.Substring(1);
-            }
-            return str;
-
-        }
 
         // Map of data type to Breeze validation type
         static Dictionary<string, string> ValidationTypeMap = new Dictionary<string, string>() {

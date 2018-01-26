@@ -198,11 +198,32 @@ namespace Breeze.PocoMetadata
         }
 
         /// <summary>
+        /// Change first letter to lowercase
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        protected virtual string camelCase(string s)
+        {
+            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
+            {
+                return s;
+            }
+            string str = char.ToLower(s[0]).ToString();
+            if (s.Length > 1)
+            {
+                str = str + s.Substring(1);
+            }
+            return str;
+
+        }
+
+        /// <summary>
         /// Maps a DataAnnotations validation attribute to the corresponding client validation descriptor
         /// </summary>
         /// <param name="attr">The validation attribute</param>
+        /// <param name="definition">The definition of the corresponding entity/property. Additional definitions can be added or removed.</param>
         /// <returns>Validator descriptor</returns>
-        public virtual Dictionary<string, object> MapValidationAttribute(ValidationAttribute attr)
+        public virtual Dictionary<string, object>[] MapValidationAttribute(ValidationAttribute attr, Dictionary<string, object> definition)
         {
             return null;
         }

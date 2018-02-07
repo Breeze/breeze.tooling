@@ -205,6 +205,7 @@ namespace Breeze.PocoMetadata
                 }
             }
 
+            validators = _describer.PostProcessValidators(validators, cmap).ToList();
             if (validators.Any())
             {
                 cmap.Add("validators", validators);
@@ -723,6 +724,7 @@ namespace Breeze.PocoMetadata
                 }
             }
 
+            validators = describer.PostProcessValidators(validators, dmap).ToList();
             if (validators.Any())
             {
                 dmap.Add("validators", validators);

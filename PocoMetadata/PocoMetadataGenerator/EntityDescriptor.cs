@@ -227,6 +227,17 @@ namespace Breeze.PocoMetadata
         {
             return null;
         }
+
+        /// <summary>
+        /// Allows for final processing of the list of validators.
+        /// </summary>
+        /// <param name="validators">The proposed list of validators/param>
+        /// <param name="definition">The definition of the corresponding entity/property. Additional definitions can be added or removed.</param>
+        /// <returns>Final list of validators</returns>
+        public virtual IEnumerable<Dictionary<string, object>> PostProcessValidators(IEnumerable<Dictionary<string, object>> validators, Dictionary<string, object> definition)
+        {
+            return validators;
+        }
     }
 
     /// <summary>

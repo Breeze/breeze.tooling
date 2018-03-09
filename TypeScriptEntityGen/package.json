@@ -1,11 +1,14 @@
 {
   "name": "typescriptentitygen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generates TypeScript classes for Breeze entities",
+  "repository": {
+    "url": "https://github.com/Breeze/breeze.tooling"
+  },
   "main": "tsgen.js",
   "dependencies": {
-    "breeze-client": "^1.5.5",
-    "handlebars": "^1.0.12"
+    "breeze-client": "^1.7.0",
+    "handlebars": "^4.0.11"
   },
   "devDependencies": {},
   "scripts": {

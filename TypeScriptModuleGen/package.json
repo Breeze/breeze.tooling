@@ -1,7 +1,10 @@
 {
   "name": "TypeScriptModuleGen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate TypeScript modules for entities from Breeze metadata",
+  "repository": {
+    "url": "https://github.com/Breeze/breeze.tooling"
+  },
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,16 +13,16 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "breeze-client": "^1.5.7",
-    "concurrently": "^1.0.0",
-    "cross-spawn": "^2.1.5",
-    "gulp": "^3.9.0",
+    "breeze-client": "^1.7.0",
+    "concurrently": "^3.5.1",
+    "cross-spawn": "^6.0.5",
+    "gulp": "^3.9.1",
     "gulp-task-listing": "^1.0.1",
-    "gulp-util": "^3.0.7",
-    "handlebars": "^4.0.5",
+    "gulp-util": "^3.0.8",
+    "handlebars": "^4.0.11",
     "lodash": "^3.10.1",
-    "q": "^1.4.1",
-    "yargs": "^3.31.0"
+    "q": "^1.5.1",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {}
 }

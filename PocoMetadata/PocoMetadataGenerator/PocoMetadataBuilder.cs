@@ -443,7 +443,7 @@ namespace Breeze.PocoMetadata
             nmap.Add("entityTypeName", relatedEntityType.Name + ":#" + relatedEntityType.Namespace);
             nmap.Add("isScalar", !isCollection);
 
-            AddAttributesToNavProperty(propertyInfo, nmap);
+            AddAttributesToNavProperty(propertyInfo, nmap, _describer);
 
             var entityRelationship = containingType.FullName + '.' + name;
 
@@ -737,8 +737,10 @@ namespace Breeze.PocoMetadata
         /// </summary>
         /// <param name="memberInfo">Property or field of the class for which metadata is being generated</param>
         /// <param name="nmap">Navigation property definition</param>
-        private static void AddAttributesToNavProperty(MemberInfo memberInfo, Dictionary<string, object> nmap)
+        /// <param name="describer">The current EntityDescriptor</param>
+        private static void AddAttributesToNavProperty(MemberInfo memberInfo, Dictionary<string, object> nmap, EntityDescriptor describer)
         {
+            var validators = new List<Dictionary<string, object>>();
             var attributes = memberInfo.GetCustomAttributes();
             foreach (var attr in attributes)
             {
@@ -762,6 +764,27 @@ namespace Breeze.PocoMetadata
                 {
                     // ServiceStack: attribute indicates a navigation property
                 }
+                else if (attr is ValidationAttribute)
+                {
+                    // Mapping custom validation attributes to client validators
+                    var validator = describer.MapValidationAttribute((ValidationAttribute)attr, nmap);
+                    if (validator == null && attr is RegularExpressionAttribute)
+                    {
+                        var pattern = GetAttributeValue(attr, "Pattern");
+                        validator = new[] { new Dictionary<string, object> { { "name", "regularExpression" }, { "expression", pattern } } };
+                    }
+
+                    if (validator != null)
+                    {
+                        validators.AddRange(validator);
+                    }
+                }
+            }
+
+            validators = describer.PostProcessValidators(validators, nmap).ToList();
+            if (validators.Any())
+            {
+                nmap.Add("validators", validators);
             }
         }
 

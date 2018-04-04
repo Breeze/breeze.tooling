@@ -108,7 +108,7 @@ namespace Breeze.PocoMetadata
             cmap.Add("namespace", type.Namespace);
             if (!type.IsInterface)
             {
-                var interfaces = type.GetInterfaces().Except(type.BaseType.GetInterfaces()).Where(t => _types.Contains(t)).Select(t => t.Name).ToList();
+                var interfaces = type.GetInterfaces().Except(GetBaseType(type).GetInterfaces()).Where(t => _types.Contains(t)).Select(t => t.Name).ToList();
                 if (interfaces.Any())
                 {
                     var custom = new Dictionary<string, object>() { { "interfaces", string.Join(", ", interfaces) } };
@@ -123,9 +123,9 @@ namespace Breeze.PocoMetadata
             else
             {
                 // Only identify the base type if it is also an entity in the type list
-                if (_entityTypes.Contains(type.BaseType))
+                if (_entityTypes.Contains(GetBaseType(type)))
                 {
-                    var baseTypeName = type.BaseType.Name + ":#" + type.BaseType.Namespace;
+                    var baseTypeName = GetBaseType(type).Name + ":#" + GetBaseType(type).Namespace;
                     cmap.Add("baseTypeName", baseTypeName);
                 }
 
@@ -167,7 +167,7 @@ namespace Breeze.PocoMetadata
                     keyProp.Remove("custom");
                 }
             }
-            else if (!type.IsAbstract && !type.IsEnum && !_describer.IsComplexType(type) && !_entityTypes.Contains(type.BaseType))
+            else if (!type.IsAbstract && !type.IsEnum && !_describer.IsComplexType(type) && !_entityTypes.Contains(GetBaseType(type)))
             {
                 // No key for an entity => error or add the key
                 var missingFKHandling = _describer.GetMissingPKHandling(type);
@@ -322,6 +322,19 @@ namespace Breeze.PocoMetadata
             }
         }
 
+        private Type GetBaseType(Type type)
+        {
+            var baseType = type.BaseType;
+            while (baseType != null)
+            {
+                if (_describer.Include(baseType))
+                    return baseType;
+                baseType = baseType.BaseType;
+            }
+
+            return typeof(object);
+        }
+
         /// <summary>
         /// Get the PropertyInfo definitions for the properties on the given type
         /// Filter out properties that are defined on a base class that is also in the metadata
@@ -343,9 +356,9 @@ namespace Breeze.PocoMetadata
 
                 var getMethod = p.GetGetMethod(false);
                 //if (getMethod.IsAbstract) return false;
-                // Exclude overriding properties; they will be defined in the metadata for the base class
+                // Exclude overriding properties, unless base class is excluded; they will be defined in the metadata for the base class
                 var baseMethod = getMethod.GetBaseDefinition();
-                if (baseMethod.DeclaringType == getMethod.DeclaringType) return true;
+                if (baseMethod.DeclaringType == getMethod.DeclaringType || !_describer.Include(baseMethod.DeclaringType)) return true;
                     //|| (baseMethod.IsAbstract && baseMethod.DeclaringType == type.BaseType)) return true;
                 return false;
             }).ToArray();
@@ -573,7 +586,7 @@ namespace Breeze.PocoMetadata
                 {
                     inverse = unmatched.Where(n => {
                         var na = (Association)n["__association"];
-                        return ass.TypesEqual(na.containingType, na.relatedType.BaseType);
+                        return ass.TypesEqual(na.containingType, GetBaseType(na.relatedType));
                     }).FirstOrDefault();
                 }
 
@@ -581,7 +594,7 @@ namespace Breeze.PocoMetadata
                 {
                     inverse = unmatched.Where(n => {
                         var na = (Association)n["__association"];
-                        return na.TypesEqual(ass.containingType, ass.relatedType.BaseType);
+                        return na.TypesEqual(ass.containingType, GetBaseType(ass.relatedType));
                     }).FirstOrDefault();
                 }
 

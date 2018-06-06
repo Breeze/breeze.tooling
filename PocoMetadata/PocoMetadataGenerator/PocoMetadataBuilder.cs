@@ -203,6 +203,10 @@ namespace Breeze.PocoMetadata
                         validators.AddRange(validator);
                     }
                 }
+                else
+                {
+                    _describer.MapCustomAttribute(attr, cmap);
+                }
             }
 
             validators = _describer.PostProcessValidators(validators, cmap).ToList();
@@ -735,6 +739,10 @@ namespace Breeze.PocoMetadata
                         validators.AddRange(validator);
                     }
                 }
+                else
+                {
+                    describer.MapCustomAttribute(attr, dmap);
+                }
             }
 
             validators = describer.PostProcessValidators(validators, dmap).ToList();
@@ -791,6 +799,10 @@ namespace Breeze.PocoMetadata
                     {
                         validators.AddRange(validator);
                     }
+                }
+                else
+                {
+                    describer.MapCustomAttribute(attr, nmap);
                 }
             }
 

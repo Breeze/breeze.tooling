@@ -218,6 +218,23 @@ namespace Breeze.PocoMetadata
         }
 
         /// <summary>
+        /// Add custom metadata
+        /// </summary>
+        /// <param name="definition">The definition to add the custom metadata to</param>
+        /// <param name="name">name</param>
+        /// <param name="value">value</param>
+        protected virtual void AddCustomMetadata(Dictionary<string, object> definition, string name, object value)
+        {
+            if (!definition.TryGetValue("custom", out object dict))
+                dict = definition["custom"] = new Dictionary<string, object>();
+
+            if (dict is Dictionary<string, object> custom)
+                custom[name] = value;
+            else
+                throw new Exception("The custom node is definied, but is not a Dictionary");
+        }
+
+        /// <summary>
         /// Maps a DataAnnotations validation attribute to the corresponding client validation descriptor
         /// </summary>
         /// <param name="attr">The validation attribute</param>
@@ -238,6 +255,13 @@ namespace Breeze.PocoMetadata
         {
             return validators;
         }
+
+        /// <summary>
+        /// Maps custom attributes to corresponding metadata
+        /// </summary>
+        /// <param name="attr">The custom attribute </param>
+        /// <param name="definition">The definition of the corresponding entity/property. Additional definitions can be added or removed.</param>
+        public virtual void MapCustomAttribute(Attribute attr, Dictionary<string, object> definition) { }
     }
 
     /// <summary>

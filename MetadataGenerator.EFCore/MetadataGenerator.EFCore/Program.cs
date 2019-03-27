@@ -68,9 +68,15 @@ namespace MetadataGenerator {
       var metadata = GetMetadataFromType(dbContextType);
       
       if (!string.IsNullOrEmpty(metadata)) {
-        var outputFolder = options.OutputFolder ?? Path.GetDirectoryName(options.InputFile);
-        var outputFileName = options.OutputFile ?? Path.GetFileNameWithoutExtension(options.InputFile) + ".metadata.json";
-        var outputFileNameFullPath  = Path.Combine(outputFolder, outputFileName);
+        string outputFileNameFullPath;
+        if (string.IsNullOrEmpty(options.OutputFile) && string.IsNullOrEmpty(options.OutputFolder)) {
+          var outputFolder = Path.GetDirectoryName(options.InputFile);
+          var outputFileName = Path.GetFileNameWithoutExtension(options.InputFile) + ".metadata.json";
+          outputFileNameFullPath = Path.Combine(outputFolder, outputFileName);
+        } else {
+          outputFileNameFullPath = string.IsNullOrEmpty(options.OutputFolder) ?
+                   Path.GetFullPath(options.OutputFile) : Path.Combine(options.OutputFolder, options.OutputFile);
+        }
         WriteMetadataToFile(metadata, outputFileNameFullPath);
         Console.WriteLine("Metadata written to: " + outputFileNameFullPath);
       }

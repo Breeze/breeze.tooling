@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MetadataGenerator.EFCore": {
+      "commandName": "Project",
+      "commandLineArgs": "-i \"C:\\GitHub\\angular-breeze.template\\server\\Model_NorthwindIB_CF.EFCore\\bin\\Debug\\netstandard2.0\\Model_NorthwindIB_CF.EFCore.dll\""
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "breeze-entity-generator",
+  "version": "1.0.0",
+  "description": "Generate TypeScript modules for entities from Breeze metadata",
+  "repository": {
+    "url": "https://github.com/Breeze/breeze.tooling"
+  },
+  "main": "",
+  "scripts": {
+    "test": "cd test && node generate-entities.js"
+  },
+  "keywords": [ "breeze", "entity", "generator", "breeze-client", "typescript", "metadata", "angular"],
+  "author": "IdeaBlade, Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "handlebars": "^4.1.2",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "breeze-client": ">=2.0.0-alpha.13"
+  },
+  "peerDependencies": {
+    "breeze-client": ">=2.0.0-alpha.13"
+  }
+}

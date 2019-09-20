@@ -8,6 +8,9 @@ namespace Breeze.PocoMetadata
         [Option('i', "input-file", HelpText = "The input assembly containing the object model", Required = true)]
         public string InputFile { get; set; }
 
+        [Option('e', "entity-descriptor", HelpText = "The assembly containing custom entity descriptor")]
+        public string EntityDescriptor { get; set; }
+
         [Option('o', "output-file", HelpText = "The name of the output file. If not specified, writes to stdout.")]
         public string OutputFile { get; set; }
 

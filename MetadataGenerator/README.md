@@ -30,3 +30,27 @@ Metadata Generator generates Breeze metadata from Entity Framework.  It accepts 
 
 `<Fully Qualified DBContext Type Names>.json`
 
+## Notes for EF Core
+
+If using Metadata Generator with EF Core, ensure that your Entity Framework Core project targets both .Net Core and .Net Standard Frameworks.  You'll point Metadata Generator to the .Net Standard DLL.
+
+There are also some required configuration additions to the .csproj file. See below for a working sample:
+
+```XML
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netstandard2.0</TargetFrameworks>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+  </ItemGroup>
+
+</Project>
+```

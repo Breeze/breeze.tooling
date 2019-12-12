@@ -1,12 +1,14 @@
 ﻿using Breeze.ContextProvider;
 using Breeze.ContextProvider.EF6;
 using System;
+using System.CodeDom;
 using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Breeze.Persistence.EFCore;
 
 namespace MetadataGenerator
 {
@@ -144,11 +146,27 @@ namespace MetadataGenerator
         {
             try
             {
-                var providerType = typeof(EFContextProvider<>).MakeGenericType(type);
-                var provider = (ContextProvider)Activator.CreateInstance(providerType);
-                var metadata = provider.Metadata();
+                if (type.BaseType == typeof(System.Data.Entity.DbContext) || type == typeof(ObjectContext)) //project is using EF6
+                {
+                    var providerType = typeof(EFContextProvider<>).MakeGenericType(type);
+                    var provider = (ContextProvider)Activator.CreateInstance(providerType);
+                    var metadata = provider.Metadata();
 
-                return metadata;
+                    return metadata;
+                }
+                else if (type.BaseType == typeof(Microsoft.EntityFrameworkCore.DbContext)) //project is using EF Core
+                {
+                    var provider = (Microsoft.EntityFrameworkCore.DbContext)Activator.CreateInstance(type);
+                    var pm = new EFPersistenceManager<Microsoft.EntityFrameworkCore.DbContext>(provider);
+                    var metadata = pm.Metadata();
+
+                    return metadata;
+                }
+                else
+                {
+                    Console.WriteLine("Could not interpret database context");
+                    return null;
+                }
             }
             //catch (InvalidOperationException iex) // This is might be because we have a DbFirst DbContext, so let's try it out.
             //{
@@ -185,8 +203,9 @@ namespace MetadataGenerator
                         t =>
                         (t.IsClass && !t.IsAbstract &&
                          (t.IsSubclassOf(typeof(DbContext))
-                           || t.IsSubclassOf(typeof(ObjectContext)))
-                         ));
+                          || t.IsSubclassOf(typeof(ObjectContext)) 
+                          || t.IsSubclassOf(typeof(Microsoft.EntityFrameworkCore.DbContext))
+                         )));
 
             return types.ToArray();
         }

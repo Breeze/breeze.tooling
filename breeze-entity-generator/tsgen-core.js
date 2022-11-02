@@ -150,7 +150,7 @@ function processRawMetadata(metadataStore, config) {
       return !property.baseProperty;
     });
     entityType.properties = properties.map(function (property) {
-      return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes) };
+      return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes), isNullable: property.isNullable};
     });
     if (entityType.baseEntityType) {
       // entityType.baseClass = entityType.baseEntityType.namespace + '.' + entityType.baseEntityType.shortName;

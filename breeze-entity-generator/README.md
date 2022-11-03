@@ -53,15 +53,9 @@ At the core of the typescript generator sits [handlebars](http://handlebarsjs.co
 
 Note: [node.js](http://nodejs.org/) must be installed and node must be part of the PATH.
 
-### Custom code and custom references
+### Custom code and imports
 
-The typescript generator preserves two special sections for each class when regenerating the code. Those sections are `<code-reference>` and `<code>`. The `<code-reference>` section is for custom references and the `<code>` section is for custom methods etc.  Following is an example of a class after it got generated showing the two sections. Everything between the opening and closing tags is preserved.
-
-`/// <reference path="Order.ts" />`
-
-`/// <code-reference> Place custom references between code-reference tags`
-
-`/// </code-reference>`
+The typescript generator preserves three special sections for each class when regenerating the code. Those sections are `<code-import>`, `<code>` and `<module-code>`. The `<code-import>` section is for custom imports, the `<code>` section is for custom methods, etc and `<module-code>` section is for module level code eg functions.  Following is an example of a class after it got generated showing the three sections. Everything between the opening and closing tags is preserved.
 
 ```
 import { EntityBase } from './EntityBase';
@@ -70,6 +64,10 @@ import { Order } from './Order';
 /// <code-import> Place custom imports between <code-import> tags
 
 /// </code-import>
+
+/// <module-code> Place module level code between <module-code> tags
+
+/// </module-code>
 
 export class InternationalOrder extends EntityBase {
 

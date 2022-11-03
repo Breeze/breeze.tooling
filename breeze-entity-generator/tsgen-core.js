@@ -183,6 +183,7 @@ function processRawMetadata(metadataStore, config) {
       entityType.originalFileContent = ts;
 
       entityType.codeimport = extractSection(ts, 'code-import', entityType.shortName);
+      entityType.modulecode = extractSection(ts, 'module-code', entityType.shortName);
       // entityType.codereference = extractSection(ts, 'code-reference');
       entityType.code = extractSection(ts, 'code', entityType.shortName);
 

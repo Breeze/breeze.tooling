@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
-var backing = require('breeze-client/bundles/breeze-client-adapter-model-library-backing-store.umd');
-var breeze = require('breeze-client/bundles/breeze-client.umd');
+var backing; // breeze-client/adapter-model-library-backing-store
+var breeze; // breeze-client
 var handlebars = require('handlebars');
 var _ = require('lodash');
 
@@ -19,7 +19,29 @@ module.exports = {
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
  */
-function generate(config) {
+async function generate(config) {
+  try {
+    // try importing as modules; else use require
+    backing = await import('breeze-client/adapter-model-library-backing-store');
+    breeze = await import('breeze-client');  
+  } catch {
+    backing = require('breeze-client/adapter-model-library-backing-store');
+    breeze = require('breeze-client');   
+  }
+  generateCore(config);
+}
+
+/** Generate the TypeScript entity files from Breeze metadata
+ * @param {Object}  config 
+ * @param {string}  config.inputFileName:      Breeze metadata file
+ * @param {string}  config.outputFolder:       Where to write TypeScript files (defaults to current folder)
+ * @param {string}  config.sourceFilesFolder:  Location of existing TS entity files (defaults to outputFolder)
+ * @param {string}  config.baseClassName:      Base class for TS entities
+ * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
+ * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
+ * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
+ */
+function generateCore(config) {
   console.log(config);
   if (!config.inputFileName || !fs.existsSync(config.inputFileName)) {
     throw new Error("Must specify a valid input file name");

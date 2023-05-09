@@ -271,7 +271,7 @@ function convertDataType(metadataStore, property, useEnumTypes) {
   }
 
   if (useEnumTypes && property.enumType) {
-    return property.enumType;
+    return getShortName(property.enumType);
   }
 
   var dataType = property.dataType;
@@ -309,7 +309,7 @@ function hasDependency(entityType, dependentEntityType) {
       return false;
     } 
     if (property.isComplexProperty && property.complexTypeName === dependentEntityType.name) return true;
-    if (property.enumType === dependentEntityType.shortName) {
+    if (property.enumType && getShortName(property.enumType) === dependentEntityType.shortName) {
       return true;
     }
   });
@@ -334,6 +334,10 @@ function fileNameCase(filename, config) {
   }
 
   return filename;
+}
+
+function getShortName(longname) {
+  return longname.split(':')[0]
 }
 
 /** Load and compile the template from the given file */

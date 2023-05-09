@@ -13,5 +13,6 @@ tsGen.generate({
   kebabCaseFileNames: true,
   baseClassName: 'BaseEntity',
   baseComplexName: 'BaseComplex',
-  codePrefix: 'Test'
+  codePrefix: 'Test',
+  useEnumTypes: true
 });

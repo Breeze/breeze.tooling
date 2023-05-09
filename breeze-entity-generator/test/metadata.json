@@ -395,6 +395,17 @@
           ]
         },
         {
+          "dataType": "NorthwindModel.Models.ProductColor",
+          "enumType": "ProductColor:#NorthwindModel.Models",
+          "isNullable": false,
+          "nameOnServer": "Color",
+          "validators": [
+            {
+              "name": "required"
+            }
+          ]
+        },
+        {
           "dataType": "Decimal",
           "isNullable": true,
           "nameOnServer": "UnitPrice",
@@ -548,5 +559,24 @@
         }
       ]
     }
+  ],
+  "enumTypes": [
+    {
+      "shortName": "ProductColor",
+      "namespace": "NorthwindModel.Models",
+      "values": [
+        "Red",
+        "Green",
+        "Blue",
+        "Yellow"
+      ],
+      "ordinals": [
+        0,
+        1,
+        2,
+        4
+      ]
+    }
   ]
+
 }

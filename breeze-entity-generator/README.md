@@ -3,7 +3,7 @@
 This tool generates TypeScript classes from Breeze metadata.  The generated classes match the server-side classes and the 
 query responses, so you can develop your application with typed entities.
 
-Breeze metadata can be generated from [EntityFramework](https://github.com/Breeze/breeze.tooling/tree/master/MetadataGenerator.EFCore), [NHibernate](https://github.com/Breeze/breeze.server.net/blob/master/AspNet/Breeze.ContextProvider.NH/NHMetadataBuilder.cs), [POCO
+Breeze metadata can be generated from [EntityFramework](https://github.com/Breeze/northwind-demo/blob/master/server/STEPS-Server-NET5.md#configure-the-program-class-to-generate-metadata), [NHibernate](https://github.com/Breeze/breeze.server.net/blob/master/AspNet/Breeze.ContextProvider.NH/NHMetadataBuilder.cs), [POCO
 classes](https://github.com/Breeze/breeze.tooling/tree/master/PocoMetadata), or [handwritten](http://breeze.github.io/doc-js/metadata-by-hand-details.html).
 
 **Usage**:	Write your JavaScript file, `generate-entities.js`:
@@ -17,7 +17,8 @@ tsGen.generate({
   kebabCaseFileNames: true,
   baseClassName: 'BaseEntity',
   baseComplexName: 'BaseComplex',
-  codePrefix: 'MyProject'
+  codePrefix: 'MyProject',
+  useEnumTypes: true
 });
 ```
 Then run `node[.exe] generate-entities.js`
@@ -31,7 +32,7 @@ Then run `node[.exe] generate-entities.js`
 - A TypeScript barrel (EntityModel.ts) exporting all of the entity classes, for easy import when several classes are required.  
 - A helper class (Metadata.ts) that exports the Breeze metadata as a static value, so it can be used by Breeze at runtime. 
 
-**Config Parameters**:
+## Config Parameters
 
 `inputFileName`: Specifies the file containing the metadata
 
@@ -43,7 +44,7 @@ Then run `node[.exe] generate-entities.js`
 
 `baseComplexName`: Optionally specifies a TypeScript base class for all the generated complex type (value type) classes. The generated classes will directly or indirectly inherit from this class. The file must contain a single module and exported class.
 
-`camelCase`: Optionally generates the property names using camel case. This parameter has no effect if the input file contains Breeze native metadata. (See [NamingConvention](http://www.breezejs.com/sites/all/apidocs/classes/NamingConvention.html#property_camelCase))
+`camelCase`: Optionally generates the property names using camel case. This parameter has no effect if the input file contains Breeze native metadata. (See [NamingConvention](http://breeze.github.io/doc-js/api-docs/classes/namingconvention.html#camelcase))
 
 `codePrefix`: Name to put in front of the generated Metadata class and the RegistrationHelper class
 
@@ -51,7 +52,7 @@ Then run `node[.exe] generate-entities.js`
 
 `useEnumTypes`: Optionally generate an Enums.ts file containing enums defined in the metadata.  Only effective if input file contains an "enumTypes" section.
 
-**Description**:
+## Description
 At the core of the typescript generator sits [handlebars](http://handlebarsjs.com/) which is responsible for generating the actual TypeScript source code. The output that handlebars generate can be customized by modifying the templates.
 
 Note: [node.js](http://nodejs.org/) must be installed and node must be part of the PATH.
@@ -88,7 +89,7 @@ export class InternationalOrder extends EntityBase {
 ```
 
 
-**Files**:	
+## Files	
 
 `node_modules` (Directory containing the third-party node libraries including Breeze)
 
@@ -109,4 +110,5 @@ export class InternationalOrder extends EntityBase {
 
 1.0.0 - Initial release as an npm package
 1.1.0 - Work with breeze-client .mjs modules (as well as older CJS bundles)
-1.2.0 - Add support for Complex Type base class and not-null (!) assertions
+1.2.0 - Add support for Complex Type base class and not-null (!) assertions.  Breaking change: entity.template.txt now imports baseClassName from the parent directory.
+1.2.1 - Fix enum type references

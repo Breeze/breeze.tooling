@@ -1,6 +1,6 @@
 {
   "name": "breeze-entity-generator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Generate TypeScript modules for entities from Breeze metadata",
   "repository": {
     "url": "https://github.com/Breeze/breeze.tooling"
@@ -28,6 +28,6 @@
     "breeze-client": "^2.1.5"
   },
   "peerDependencies": {
-    "breeze-client": ">=2.0.0"
+    "breeze-client": ">=2.1.5"
   }
 }

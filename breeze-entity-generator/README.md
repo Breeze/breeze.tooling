@@ -16,6 +16,7 @@ tsGen.generate({
   camelCase: true,
   kebabCaseFileNames: true,
   baseClassName: 'BaseEntity',
+  baseComplexName: 'BaseComplex',
   codePrefix: 'MyProject'
 });
 ```
@@ -38,7 +39,9 @@ Then run `node[.exe] generate-entities.js`
 
 `sourceFilesFolder`: Optionally specifies the location to find existing TypeScript files.  The `<code>` blocks from these files will be preserved in the corresponding output files.  If not specified, the outputFolder will be used.
 
-`baseClassName`: Optionally specifies a TypeScript base class for all the generated entity classes. The generated entity classes will directly or indirectly inherit from this class. The file must contain a single module and exported class
+`baseClassName`: Optionally specifies a TypeScript base class for all the generated entity classes. The generated entity classes will directly or indirectly inherit from this class. The file must contain a single module and exported class.
+
+`baseComplexName`: Optionally specifies a TypeScript base class for all the generated complex type (value type) classes. The generated classes will directly or indirectly inherit from this class. The file must contain a single module and exported class.
 
 `camelCase`: Optionally generates the property names using camel case. This parameter has no effect if the input file contains Breeze native metadata. (See [NamingConvention](http://www.breezejs.com/sites/all/apidocs/classes/NamingConvention.html#property_camelCase))
 
@@ -100,3 +103,10 @@ export class InternationalOrder extends EntityBase {
 `metadata.template.txt` (Handlebars template for the static metadata)
 
 `tsgen-core.js` (The typescript generator node script)
+
+
+## Release Notes
+
+1.0.0 - Initial release as an npm package
+1.1.0 - Work with breeze-client .mjs modules (as well as older CJS bundles)
+1.2.0 - Add support for Complex Type base class and not-null (!) assertions

@@ -1,7 +1,7 @@
 // tslint:disable:no-trailing-whitespace
 // tslint:disable:member-ordering
 {{#if baseClass}}
-import { {{baseClass}} } from './{{baseClassModuleName}}';
+import { {{baseClass}} } from '../{{baseClassModuleName}}';
 {{/if}}
 {{#imports}}import { {{path}} } from './{{moduleName}}';
 {{/imports}}
@@ -22,7 +22,7 @@ export class {{shortName}} {{#baseClass}}extends {{.}} {{/baseClass}} {
 
   // Generated code. Do not place code below this line.
   {{#properties}}
-  {{name}}{{#if isNullable}}?{{/if}}: {{dataType}};
+  {{name}}{{#if isNullable}}?{{else}}!{{/if}}: {{dataType}};
   {{/properties}}
 }
 

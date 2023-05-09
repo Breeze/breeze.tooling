@@ -15,6 +15,7 @@ module.exports = {
  * @param {string}  config.outputFolder:       Where to write TypeScript files (defaults to current folder)
  * @param {string}  config.sourceFilesFolder:  Location of existing TS entity files (defaults to outputFolder)
  * @param {string}  config.baseClassName:      Base class for TS entities
+ * @param {string}  config.baseComplexName:    Base class for TS complex types
  * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
@@ -37,6 +38,7 @@ async function generate(config) {
  * @param {string}  config.outputFolder:       Where to write TypeScript files (defaults to current folder)
  * @param {string}  config.sourceFilesFolder:  Location of existing TS entity files (defaults to outputFolder)
  * @param {string}  config.baseClassName:      Base class for TS entities
+ * @param {string}  config.baseComplexName:    Base class for TS complex types
  * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
@@ -157,7 +159,11 @@ function processRawMetadata(metadataStore, config) {
 
   var baseClass = config.baseClassName;
   if (baseClass) {
-    console.log('Injected base class: ' + baseClass);
+    console.log('Injected base entity class: ' + baseClass);
+  }
+  var baseComplex = config.baseComplexName;
+  if (baseComplex) {
+    console.log('Injected base complex type class: ' + baseComplex);
   }
 
   var allModules = metadataStore.modules.concat(metadataStore.enumModules || []);
@@ -177,12 +183,14 @@ function processRawMetadata(metadataStore, config) {
     if (entityType.baseEntityType) {
       // entityType.baseClass = entityType.baseEntityType.namespace + '.' + entityType.baseEntityType.shortName;
       entityType.baseClass = entityType.baseEntityType.shortName;
-    } else if (baseClass) {
+    } else if (baseClass && !entityType.isComplexType) {
       entityType.baseClass = baseClass;
       //entityType.references.push({
       //  entityType: null,
       //  path: path.relative(config.sourceFilesFolder, baseClassFileName.substr(0, baseClassFileName.length - 3))
       //});
+    } else if (baseComplex && entityType.isComplexType) {
+      entityType.baseClass = baseComplex;
     }
     entityType.baseClassModuleName = fileNameCase(entityType.baseClass, config);
     entityType.imports = allModules.filter(function (module) {

@@ -12,5 +12,6 @@ tsGen.generate({
   camelCase: true,
   kebabCaseFileNames: true,
   baseClassName: 'BaseEntity',
+  baseComplexName: 'BaseComplex',
   codePrefix: 'Test'
 });

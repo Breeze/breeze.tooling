@@ -112,3 +112,4 @@ export class InternationalOrder extends EntityBase {
 1.1.0 - Work with breeze-client .mjs modules (as well as older CJS bundles)
 1.2.0 - Add support for Complex Type base class and not-null (!) assertions.  Breaking change: entity.template.txt now imports baseClassName from the parent directory.
 1.2.1 - Fix enum type references
+1.3.0 - Use TypeScript enum types instead of string unions for enums.

@@ -1,3 +1,6 @@
-{{#enumTypes}}export type {{shortName}} ={{#each values}} "{{camelCase this}}"{{#unless @last}} |{{/unless}}{{/each}};
+{{#enumTypes}}export enum {{shortName}} {
+{{#each values}}  {{this}} = "{{this}}",
+{{/each}}
+}
 
 {{/enumTypes}}

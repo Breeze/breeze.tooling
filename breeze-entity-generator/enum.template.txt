@@ -1,5 +1,5 @@
 {{#enumTypes}}export enum {{shortName}} {
-{{#each values}}  {{this}} = "{{this}}",
+{{#each values}}  {{this}} = {{lookup ../ordinals @index}},
 {{/each}}
 }
 

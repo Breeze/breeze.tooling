@@ -50,7 +50,7 @@ Then run `node[.exe] generate-entities.js`
 
 `kebabCaseFileNames`: Optionally generate kebab-case-file-names instead of PascalCaseFileNames.
 
-`useEnumTypes`: Optionally generate an Enums.ts file containing enums defined in the metadata.  Only effective if input file contains an "enumTypes" section.
+`useEnumTypes`: Optionally generate an Enums.ts file containing enums defined in the metadata.  Only effective if input metadata contains an "enumTypes" section.
 
 ## Description
 At the core of the typescript generator sits [handlebars](http://handlebarsjs.com/) which is responsible for generating the actual TypeScript source code. The output that handlebars generate can be customized by modifying the templates.
@@ -113,3 +113,4 @@ export class InternationalOrder extends EntityBase {
 1.2.0 - Add support for Complex Type base class and not-null (!) assertions.  Breaking change: entity.template.txt now imports baseClassName from the parent directory.
 1.2.1 - Fix enum type references
 1.3.0 - Use TypeScript enum types instead of string unions for enums.
+1.3.1 - Use ordinal values instead of strings for enum definitions, e.g. `Green = 2`.  Template change only.

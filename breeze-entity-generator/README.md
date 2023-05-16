@@ -114,3 +114,4 @@ export class InternationalOrder extends EntityBase {
 1.2.1 - Fix enum type references
 1.3.0 - Use TypeScript enum types instead of string unions for enums.
 1.3.1 - Use ordinal values instead of strings for enum definitions, e.g. `Green = 2`.  Template change only.
+1.3.2 - Include './enums' in entity-model.ts.  Template change only.

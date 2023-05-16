@@ -1,3 +1,5 @@
 {{#modules}}export { {{path}} } from './{{moduleName}}';
 {{/modules}}
+{{#enumModules}}export { {{path}} } from './enums';
+{{/enumModules}}
 

@@ -105,7 +105,8 @@ function generateCore(config) {
 
   // Generate registration helper
   compiledTemplate = compileTemplate('register.template.txt');
-  var ts = compiledTemplate(metadataStore);
+  var regModules = metadataStore.modules.filter(m => !m.entityType.isAbstract);
+  var ts = compiledTemplate({ modules: regModules });
   var filename = fileNameCase('RegistrationHelper', config) + '.ts';
   writeIfChanged(filename, ts, config);
 
@@ -192,7 +193,8 @@ function processRawMetadata(metadataStore, config) {
     } else if (baseComplex && entityType.isComplexType) {
       entityType.baseClass = baseComplex;
     }
-    entityType.baseClassModuleName = fileNameCase(entityType.baseClass, config);
+    var baseModulePrefix = entityType.baseClass == baseClass ? '../' : './';
+    entityType.baseClassModuleName = baseModulePrefix + fileNameCase(entityType.baseClass, config);
     entityType.imports = allModules.filter(function (module) {
       // baseClass is already imported in the template
       if (module.entityType === entityType || module.path === entityType.baseClass) {
@@ -205,6 +207,8 @@ function processRawMetadata(metadataStore, config) {
 
     // Set output filename path
     entityType.filename = path.resolve(config.outputFolder, fileNameCase(entityType.shortName, config) + '.ts');
+
+    entityType.abstract = entityType.isAbstract ? 'abstract ' : '';
 
     // Extract custom code from existing file
     entityType.sourceFilename = path.resolve(config.sourceFilesFolder, fileNameCase(entityType.shortName, config) + '.ts');

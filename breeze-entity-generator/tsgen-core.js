@@ -106,7 +106,7 @@ function generateCore(config) {
   // Generate registration helper
   compiledTemplate = compileTemplate('register.template.txt');
   var regModules = metadataStore.modules.filter(m => !m.entityType.isAbstract);
-  var ts = compiledTemplate({ modules: regModules });
+  var ts = compiledTemplate({ codePrefix: metadataStore.codePrefix, modules: regModules });
   var filename = fileNameCase('RegistrationHelper', config) + '.ts';
   writeIfChanged(filename, ts, config);
 
@@ -193,7 +193,7 @@ function processRawMetadata(metadataStore, config) {
     } else if (baseComplex && entityType.isComplexType) {
       entityType.baseClass = baseComplex;
     }
-    var baseModulePrefix = entityType.baseClass == baseClass ? '../' : './';
+    var baseModulePrefix = (entityType.baseClass == baseClass || entityType.baseClass == baseComplex) ? '../' : './';
     entityType.baseClassModuleName = baseModulePrefix + fileNameCase(entityType.baseClass, config);
     entityType.imports = allModules.filter(function (module) {
       // baseClass is already imported in the template

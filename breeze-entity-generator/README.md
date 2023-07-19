@@ -116,3 +116,4 @@ export class InternationalOrder extends EntityBase {
 1.3.1 - Use ordinal values instead of strings for enum definitions, e.g. `Green = 2`.  Template change only.
 1.3.2 - Include './enums' in entity-model.ts.  Template change only.
 1.3.3 - Proper handling of abstract base classes: write 'abstract' modifier, correct include path, exclude from RegistrationHelper
+1.3.4 - Fix class name of RegistrationHelper; Fix include path to base complex type

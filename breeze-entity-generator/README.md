@@ -18,7 +18,8 @@ tsGen.generate({
   baseClassName: 'BaseEntity',
   baseComplexName: 'BaseComplex',
   codePrefix: 'MyProject',
-  useEnumTypes: true
+  useEnumTypes: true,
+  propertyComments: true
 });
 ```
 Then run `node[.exe] generate-entities.js`
@@ -51,6 +52,14 @@ Then run `node[.exe] generate-entities.js`
 `kebabCaseFileNames`: Optionally generate kebab-case-file-names instead of PascalCaseFileNames.
 
 `useEnumTypes`: Optionally generate an Enums.ts file containing enums defined in the metadata.  Only effective if input metadata contains an "enumTypes" section.
+
+`propertyComments`: Optionally include metadata comments on data properties, indicating original datatype and key relationships, e.g.:
+```ts
+  /** String(50) */
+  productName!: string;
+  /** Int32 FK supplier */
+  supplierId!: number;
+```
 
 ## Description
 At the core of the typescript generator sits [handlebars](http://handlebarsjs.com/) which is responsible for generating the actual TypeScript source code. The output that handlebars generate can be customized by modifying the templates.
@@ -117,3 +126,4 @@ export class InternationalOrder extends EntityBase {
 1.3.2 - Include './enums' in entity-model.ts.  Template change only.
 1.3.3 - Proper handling of abstract base classes: write 'abstract' modifier, correct include path, exclude from RegistrationHelper
 1.3.4 - Fix class name of RegistrationHelper; Fix include path to base complex type
+1.4.0 - Add property comments indicating type, maxlength, key, and fk

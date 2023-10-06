@@ -14,5 +14,6 @@ tsGen.generate({
   baseClassName: 'BaseEntity',
   baseComplexName: 'BaseComplex',
   codePrefix: 'Test',
-  useEnumTypes: true
+  useEnumTypes: true,
+  propertyComments: true,
 });

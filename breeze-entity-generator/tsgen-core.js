@@ -19,6 +19,7 @@ module.exports = {
  * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
+ * @param {boolean} config.propertyComments:   Whether to add comments to each data property
  */
 async function generate(config) {
   try {
@@ -42,6 +43,7 @@ async function generate(config) {
  * @param {boolean} config.camelCase:          Whether to use camelCase for TS property names
  * @param {boolean} config.kebabCaseFileNames: Whether to kebab-case-file-names.ts (otherwise PascalCaseFileNames.ts)
  * @param {boolean} config.useEnumTypes:       Whether to output Enums.ts (if the input metadata contains an "enumTypes" section)
+ * @param {boolean} config.propertyComments:   Whether to add comments to each data property
  */
 function generateCore(config) {
   console.log(config);
@@ -62,6 +64,7 @@ function generateCore(config) {
   console.log('camelCase: ' + !!config.camelCase);
   console.log('kebabCaseFileNames: ' + !!config.kebabCaseFileNames);
   console.log('useEnumTypes: ' + !!config.useEnumTypes);
+  console.log('propertyComments: ' + !!config.propertyComments);
 
   handlebars.registerHelper('camelCase', function(str) {
     return _.camelCase(str);
@@ -179,8 +182,10 @@ function processRawMetadata(metadataStore, config) {
       return !property.baseProperty;
     });
     entityType.properties = properties.map(function (property) {
-      return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes), isNullable: property.isNullable};
+      return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes), isNullable: property.isNullable,
+        comment: config.propertyComments && getPropertyComment(property) };
     });
+
     if (entityType.baseEntityType) {
       // entityType.baseClass = entityType.baseEntityType.namespace + '.' + entityType.baseEntityType.shortName;
       entityType.baseClass = entityType.baseEntityType.shortName;
@@ -293,6 +298,30 @@ function convertDataType(metadataStore, property, useEnumTypes) {
   }
   return 'any';
 }
+
+/** Get a data type comment for the given property */
+function getPropertyComment(property) {
+  if (property.isDataProperty) {
+    var com = property.enumType ? 'Enum' : property.isComplexProperty ? 'Complex' : property.dataType.name;
+    if (property.maxLength) {
+      com += '(' + property.maxLength + ')';
+    } 
+    if (property.isPartOfKey) {
+      com += ' key';
+    }
+    if (property.relatedNavigationProperty) {
+      com += ' FK ' + property.relatedNavigationProperty.name;
+    }
+    return com;
+  } else if (property.isNavigationProperty) {
+    if (property.foreignKeyNames.length && property.foreignKeyNames.length) {
+      return 'FK ' + property.foreignKeyNames.join(',');
+    } else {
+      return 'Inv FK ' + property.invForeignKeyNames.join(',');
+    }
+  }
+}
+
 
 /** Get the EntityType of the given name */
 function getEntityType(metadataStore, name) {

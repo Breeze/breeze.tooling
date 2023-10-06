@@ -21,8 +21,8 @@ export {{abstract}}class {{shortName}} {{#baseClass}}extends {{.}} {{/baseClass}
   /// </code>
 
   // Generated code. Do not place code below this line.
-  {{#properties}}
-  {{name}}{{#if isNullable}}?{{else}}!{{/if}}: {{dataType}};
-  {{/properties}}
+{{#properties}}{{#if comment}}  /** {{comment}} */
+{{/if}}  {{name}}{{#if isNullable}}?{{else}}!{{/if}}: {{dataType}};
+{{/properties}}
 }
 

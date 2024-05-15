@@ -155,7 +155,7 @@ function processRawMetadata(metadataStore, config) {
   });
 
 
-  if (config.useEnumTypes) {
+  if (config.useEnumTypes && metadataStore.enumTypes) {
     metadataStore.enumModules = metadataStore.enumTypes.map(function (enumType) {
       return { entityType: enumType, path: enumType.shortName, moduleName: fileNameCase("Enums", config) };
     });

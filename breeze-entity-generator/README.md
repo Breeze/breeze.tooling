@@ -127,3 +127,4 @@ export class InternationalOrder extends EntityBase {
 1.3.3 - Proper handling of abstract base classes: write 'abstract' modifier, correct include path, exclude from RegistrationHelper
 1.3.4 - Fix class name of RegistrationHelper; Fix include path to base complex type
 1.4.0 - Add property comments indicating type, maxlength, key, and fk
+1.4.1 - Add handling for string or number enums, based on how they are defined in metadata.enumTypes

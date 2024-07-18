@@ -182,6 +182,7 @@ function processRawMetadata(metadataStore, config) {
       return !property.baseProperty;
     });
     entityType.properties = properties.map(function (property) {
+      
       return { name: property.name, dataType: convertDataType(metadataStore, property, config.useEnumTypes), isNullable: property.isNullable,
         comment: config.propertyComments && getPropertyComment(property) };
     });
@@ -287,12 +288,19 @@ function convertDataType(metadataStore, property, useEnumTypes) {
   if (dataType.isNumeric) {
     return 'number';
   }
+
   if (dataType === breeze.DataType.Boolean) {
     return 'boolean';
   }
+
   if (dataType === breeze.DataType.DateTime || dataType === breeze.DataType.DateTimeOffset || dataType === breeze.DataType.Time) {
     return 'Date';
   }
+  
+  if (dataType === breeze.DataType.DateOnly) {
+    return 'Date';
+  }
+  
   if (dataType === breeze.DataType.String || dataType === breeze.DataType.Guid) {
     return 'string';
   }
